@@ -23,8 +23,11 @@ player_height = 60
 player_x = width // 2
 player_y = height - player_height * 2
 speed_player = 5
-arara = pygame.image.load('assets/arara.png')
-arara = pygame.transform.scale(arara, (player_width, player_height))
+arara_image = pygame.image.load('assets/arara.png')
+arara_image = pygame.transform.scale(arara_image, (player_width, player_height))
+
+# Direção do jogador
+facing_right = False  # A arara começa virada para a esquerda
 
 # Mira
 aim_width = 5
@@ -50,6 +53,10 @@ walls = [
 
 # Desenha o jogador (arara) usando imagem
 def draw_player():
+    if facing_right:
+        arara = pygame.transform.flip(arara_image, True, False)
+    else:
+        arara = arara_image
     tela.blit(arara, (player_x, player_y))
     # Mira do jogador
     pygame.draw.rect(tela, YELLOW, (aim_x, aim_y, aim_width, aim_height))
@@ -87,8 +94,10 @@ while True:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         player_x -= speed_player
+        facing_right = False
     if keys[pygame.K_RIGHT]:
         player_x += speed_player
+        facing_right = True
     if keys[pygame.K_UP]:
         player_y -= speed_player
     if keys[pygame.K_DOWN]:
