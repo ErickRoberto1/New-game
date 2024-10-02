@@ -37,6 +37,7 @@ aim_y = player_y - aim_height
 
 # Bala
 bullet_size = 5
+clicks = 0 # controls rate of fire
 bullets = []
 
 # Inimigos
@@ -89,6 +90,9 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             exit()
+        if event.type == KEYDOWN:
+            if event.key == K_SPACE:
+                clicks = 0
 
     # Movimento do player
     keys = pygame.key.get_pressed()
@@ -103,8 +107,10 @@ while True:
     if keys[pygame.K_DOWN]:
         player_y += speed_player
     if keys[pygame.K_SPACE]:
-        # Adiciona uma nova bala na posição da mira
-        bullets.append([aim_x + aim_width // 2, aim_y])  # Posição da bala
+        if clicks <= 0 :
+            # Adiciona uma nova bala na posição da mira
+            bullets.append([aim_x + aim_width // 2, aim_y])  # Posição da bala
+            clicks += 1
 
     # Limites do jogador
     player_x = max(0, min(width - player_width, player_x))
