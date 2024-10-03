@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 from sys import exit
 import random
+import math
 
 pygame.init()
 
@@ -37,10 +38,16 @@ aim_height = 15
 aim_x = player_x + (player_width // 2) - (aim_width // 2)
 aim_y = player_y - aim_height
 
-# Bala
+# Bala do jogador
 bullet_size = 5
 clicks = 0  # Controla a taxa de tiro
 bullets = []
+
+# Balas das árvores
+tree_bullets = []
+
+# Timer para disparos das árvores
+tree_shoot_timer = 0
 
 # Inimigos
 enemy_size = 20
@@ -115,9 +122,13 @@ def draw_walls():
     for wall in walls:
         pygame.draw.rect(tela, WHITE, wall)
 
-# Desenha as balas
+# Desenha as balas do jogador
 def draw_bullet(bullet):
     pygame.draw.circle(tela, WHITE, (bullet[0], bullet[1]), bullet_size)
+
+# Desenha as balas das árvores
+def draw_tree_bullet(tree_bullet):
+    pygame.draw.circle(tela, (255, 0, 0), (tree_bullet[0], tree_bullet[1]), bullet_size)  # Cor vermelha para diferenciar
 
 # Desenha as árvores para formar a floresta e o fogo sobrepondo o topo de cada árvore
 def draw_forest_with_fire():
@@ -128,7 +139,7 @@ def draw_forest_with_fire():
             fire_y = pos[1] - 20  # Posiciona o fogo para sobrepor o topo da árvore
             tela.blit(fire_image, (fire_x, fire_y))  # Desenha o fogo sobre as folhas da árvore
 
-# Atualiza a posição das balas
+# Atualiza a posição das balas do jogador
 def update_bullets():
     for bullet in bullets[:]:
         bullet[1] -= 10  # Move a bala para cima
@@ -147,6 +158,16 @@ def update_bullets():
         # Remove a bala se sair da tela
         if bullet[1] < 0:
             bullets.remove(bullet)
+
+# Atualiza a posição das balas das árvores
+def update_tree_bullets():
+    for tree_bullet in tree_bullets[:]:
+        tree_bullet[0] += tree_bullet[2]  # Atualiza posição x com a direção x
+        tree_bullet[1] += tree_bullet[3]  # Atualiza posição y com a direção y
+
+        # Remove a bala se sair da tela
+        if tree_bullet[0] < 0 or tree_bullet[0] > width or tree_bullet[1] < 0 or tree_bullet[1] > height:
+            tree_bullets.remove(tree_bullet)
 
 # Loop principal do jogo
 while True:
@@ -203,6 +224,28 @@ while True:
         player_x = new_player_x
         player_y = new_player_y
 
+    # Atualiza o timer de disparo das árvores
+    tree_shoot_timer += clock.get_time()
+    if tree_shoot_timer >= 4000:  # 4 segundos
+        tree_shoot_timer = 0
+        for i, pos in enumerate(tree_positions):
+            if trees_on_fire[i]:  # Só árvores em chamas disparam
+                # Calcular a direção do tiro
+                direction_x = player_x - pos[0]
+                direction_y = player_y - pos[1]
+                distance = math.hypot(direction_x, direction_y)
+                if distance != 0:
+                    direction_x /= distance
+                    direction_y /= distance
+
+                # Multiplicar pela velocidade da bala
+                bullet_speed = 4
+                direction_x *= bullet_speed
+                direction_y *= bullet_speed
+
+                # Adicionar bala das árvores
+                tree_bullets.append([pos[0] + 30, pos[1] + 40, direction_x, direction_y])
+
     # Limpa a tela com um tom de verde para representar grama
     tela.fill(GREEN_GRASS)
 
@@ -211,14 +254,17 @@ while True:
     draw_walls()  # Desenha as paredes brancas ao redor do cenário
     draw_enemies()  # Desenha os inimigos
     draw_player()  # Desenha o jogador
-    update_bullets()  # Atualiza e desenha as balas
+    update_bullets()  # Atualiza e desenha as balas do jogador
     for bullet in bullets:
         draw_bullet(bullet)
 
-    # Disparar as balas
+    update_tree_bullets()  # Atualiza e desenha as balas das árvores
+    for tree_bullet in tree_bullets:
+        draw_tree_bullet(tree_bullet)
+
+    # Disparar as balas do jogador
     if keys[pygame.K_SPACE] and clicks <= 0:
-        # Adiciona uma nova bala na posição da mira
-        bullets.append([aim_x + aim_width // 2, aim_y])  # Posição da bala
+        bullets.append([aim_x + aim_width // 2, aim_y])  # Adiciona uma nova bala na posição da mira
         clicks += 1
 
     pygame.display.update()
