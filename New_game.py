@@ -6,14 +6,12 @@ import random
 pygame.init()
 
 # Cores
-GREEN_GRASS = (34, 139, 34)
-BLUE_LIGHT = (0, 102, 204)
-YELLOW = (255, 221, 51)
+GREEN_GRASS = (34, 139, 34)  # Cor de fundo verde, semelhante à grama
 WHITE = (255, 255, 255)
 
 # Tela
 width = 1200
-height = 875
+height = 800
 tela = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Retro Game with Arara Player")
 clock = pygame.time.Clock()
@@ -45,12 +43,12 @@ bullets = []
 enemy_size = 20
 enemies = [[200, 150], [250, 150], [300, 100]]
 
-# Paredes
+# Paredes ao redor das bordas da tela (todas brancas)
 walls = [
-    (100, 100, 600, 20),  # Parede superior
-    (100, 400, 600, 20),  # Parede inferior
-    (100, 100, 20, 320),  # Parede esquerda
-    (680, 100, 20, 320),  # Parede direita
+    (0, 0, width, 20),            # Parede superior
+    (0, height - 20, width, 20),  # Parede inferior
+    (0, 0, 20, height),           # Parede esquerda
+    (width - 20, 0, 20, height)   # Parede direita
 ]
 
 # Carrega e redimensiona a imagem da árvore
@@ -71,8 +69,8 @@ max_attempts = 1000  # Número máximo de tentativas para encontrar uma posiçã
 while len(tree_positions) < 20:  # Queremos 20 árvores
     attempts = 0
     while attempts < max_attempts:
-        x = random.randint(0, width - 60)
-        y = random.randint(0, height - 80)
+        x = random.randint(20, width - 80)  # Posição para evitar sobreposição com as paredes
+        y = random.randint(20, height - 100)
         if is_position_valid(x, y, tree_positions, min_distance=80):
             tree_positions.append((x, y))
             break
@@ -86,17 +84,17 @@ def draw_player():
         arara = arara_image
     tela.blit(arara, (player_x, player_y))
     # Mira do jogador
-    pygame.draw.rect(tela, YELLOW, (aim_x, aim_y, aim_width, aim_height))
+    pygame.draw.rect(tela, WHITE, (aim_x, aim_y, aim_width, aim_height))
 
 # Desenha os inimigos
 def draw_enemies():
     for enemy in enemies:
-        pygame.draw.rect(tela, YELLOW, (enemy[0], enemy[1], enemy_size, enemy_size))
+        pygame.draw.rect(tela, WHITE, (enemy[0], enemy[1], enemy_size, enemy_size))
 
-# Desenha as paredes
+# Desenha as paredes ao redor da tela
 def draw_walls():
     for wall in walls:
-        pygame.draw.rect(tela, BLUE_LIGHT, wall)
+        pygame.draw.rect(tela, WHITE, wall)
 
 # Desenha as balas
 def draw_bullet(bullet):
@@ -144,8 +142,8 @@ while True:
             clicks += 1
 
     # Limites do jogador
-    player_x = max(0, min(width - player_width, player_x))
-    player_y = max(0, min(height - player_height, player_y))
+    player_x = max(20, min(width - player_width - 20, player_x))
+    player_y = max(20, min(height - player_height - 20, player_y))
 
     # Atualiza a mira
     aim_x = player_x + (player_width // 2) - (aim_width // 2)
@@ -156,7 +154,7 @@ while True:
 
     # Desenha o cenário
     draw_forest()  # Desenha a floresta de fundo
-    draw_walls()
+    draw_walls()   # Desenha as paredes brancas ao redor do cenário
     draw_enemies()
     draw_player()
     update_bullets()
