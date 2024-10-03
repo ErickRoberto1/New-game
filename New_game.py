@@ -67,31 +67,31 @@ tree_mask = pygame.mask.from_surface(tree_image)
 
 # Função para verificar se uma posição está longe o suficiente de outras árvores e do centro
 def is_position_valid(x, y, positions, min_distance):
-    # Distância mínima entre árvores (ajustada para o tamanho do jogador + 20 pixels)
     for pos in positions:
         if abs(x - pos[0]) < min_distance and abs(y - pos[1]) < min_distance:
             return False
 
-    # Distância mínima do centro (para evitar sobreposição com o jogador)
     center_x, center_y = width // 2, height // 2
     distance_from_center = ((x - center_x) ** 2 + (y - center_y) ** 2) ** 0.5
-    if distance_from_center < 100:  # Raio seguro de 100 pixels ao redor do centro
+    if distance_from_center < 100:
         return False
 
     return True
 
 # Cria várias árvores em posições aleatórias para formar uma floresta, garantindo distância mínima
 tree_positions = []
+trees_on_fire = []  # Lista que indica quais árvores estão pegando fogo
 max_attempts = 1000
 min_distance_between_trees = player_height + 20
 
-while len(tree_positions) < 18:
+while len(tree_positions) < 15:
     attempts = 0
     while attempts < max_attempts:
         x = random.randint(20, width - 80)
         y = random.randint(20, height - 100)
         if is_position_valid(x, y, tree_positions, min_distance=min_distance_between_trees):
             tree_positions.append((x, y))
+            trees_on_fire.append(True)  # Todas as árvores começam pegando fogo
             break
         attempts += 1
 
@@ -121,17 +121,31 @@ def draw_bullet(bullet):
 
 # Desenha as árvores para formar a floresta e o fogo sobrepondo o topo de cada árvore
 def draw_forest_with_fire():
-    for pos in tree_positions:
+    for i, pos in enumerate(tree_positions):
         tela.blit(tree_image, pos)  # Desenha a árvore
-        fire_x = pos[0]
-        fire_y = pos[1] - 20  # Posiciona o fogo para sobrepor o topo da árvore
-        tela.blit(fire_image, (fire_x, fire_y))  # Desenha o fogo sobre as folhas da árvore
+        if trees_on_fire[i]:
+            fire_x = pos[0]
+            fire_y = pos[1] - 20  # Posiciona o fogo para sobrepor o topo da árvore
+            tela.blit(fire_image, (fire_x, fire_y))  # Desenha o fogo sobre as folhas da árvore
 
 # Atualiza a posição das balas
 def update_bullets():
     for bullet in bullets[:]:
         bullet[1] -= 10  # Move a bala para cima
-        if bullet[1] < 0:  # Remove a bala se sair da tela
+        bullet_rect = pygame.Rect(bullet[0] - bullet_size, bullet[1] - bullet_size, bullet_size * 2, bullet_size * 2)
+
+        # Verifica colisão da bala com árvores
+        for i, pos in enumerate(tree_positions):
+            tree_rect = pygame.Rect(pos[0], pos[1], 60, 80)
+
+            if bullet_rect.colliderect(tree_rect) and trees_on_fire[i]:
+                # Se houver colisão e a árvore estiver pegando fogo, apagar o fogo
+                trees_on_fire[i] = False
+                bullets.remove(bullet)
+                break
+
+        # Remove a bala se sair da tela
+        if bullet[1] < 0:
             bullets.remove(bullet)
 
 # Loop principal do jogo
@@ -193,7 +207,7 @@ while True:
     tela.fill(GREEN_GRASS)
 
     # Desenha o cenário
-    draw_forest_with_fire()  # Desenha as árvores com fogo sobrepondo o topo
+    draw_forest_with_fire()  # Desenha as árvores com fogo sobrepondo o topo, se ainda estiverem pegando fogo
     draw_walls()  # Desenha as paredes brancas ao redor do cenário
     draw_enemies()  # Desenha os inimigos
     draw_player()  # Desenha o jogador
