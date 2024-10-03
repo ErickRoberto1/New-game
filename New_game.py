@@ -58,6 +58,10 @@ walls = [
 tree_image = pygame.image.load('assets/tree.png')
 tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da árvore
 
+# Carrega e redimensiona a imagem do fogo
+fire_image = pygame.image.load('assets/fire.png')
+fire_image = pygame.transform.scale(fire_image, (60, 60))  # Ajusta o tamanho do fogo
+
 # Criar máscara para a árvore
 tree_mask = pygame.mask.from_surface(tree_image)
 
@@ -81,7 +85,7 @@ tree_positions = []
 max_attempts = 1000
 min_distance_between_trees = player_height + 20
 
-while len(tree_positions) < 15:
+while len(tree_positions) < 18:
     attempts = 0
     while attempts < max_attempts:
         x = random.randint(20, width - 80)
@@ -115,10 +119,13 @@ def draw_walls():
 def draw_bullet(bullet):
     pygame.draw.circle(tela, WHITE, (bullet[0], bullet[1]), bullet_size)
 
-# Desenha as árvores para formar a floresta
-def draw_forest():
+# Desenha as árvores para formar a floresta e o fogo sobrepondo o topo de cada árvore
+def draw_forest_with_fire():
     for pos in tree_positions:
-        tela.blit(tree_image, pos)
+        tela.blit(tree_image, pos)  # Desenha a árvore
+        fire_x = pos[0]
+        fire_y = pos[1] - 20  # Posiciona o fogo para sobrepor o topo da árvore
+        tela.blit(fire_image, (fire_x, fire_y))  # Desenha o fogo sobre as folhas da árvore
 
 # Atualiza a posição das balas
 def update_bullets():
@@ -186,11 +193,11 @@ while True:
     tela.fill(GREEN_GRASS)
 
     # Desenha o cenário
-    draw_forest()
-    draw_walls()
-    draw_enemies()
-    draw_player()
-    update_bullets()
+    draw_forest_with_fire()  # Desenha as árvores com fogo sobrepondo o topo
+    draw_walls()  # Desenha as paredes brancas ao redor do cenário
+    draw_enemies()  # Desenha os inimigos
+    draw_player()  # Desenha o jogador
+    update_bullets()  # Atualiza e desenha as balas
     for bullet in bullets:
         draw_bullet(bullet)
 
