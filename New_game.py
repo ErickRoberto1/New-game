@@ -6,14 +6,14 @@ import random
 pygame.init()
 
 # Cores
-BLACK = (0, 0, 0)
+GREEN_GRASS = (34, 139, 34)
 BLUE_LIGHT = (0, 102, 204)
 YELLOW = (255, 221, 51)
 WHITE = (255, 255, 255)
 
 # Tela
-width = 800
-height = 600
+width = 1200
+height = 875
 tela = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Retro Game with Arara Player")
 clock = pygame.time.Clock()
@@ -57,12 +57,26 @@ walls = [
 tree_image = pygame.image.load('assets/tree.png')
 tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da árvore
 
-# Cria várias árvores em posições aleatórias para formar uma floresta
+# Função para verificar se uma posição está longe o suficiente de outras árvores
+def is_position_valid(x, y, positions, min_distance=80):
+    for pos in positions:
+        distance = ((x - pos[0]) ** 2 + (y - pos[1]) ** 2) ** 0.5
+        if distance < min_distance:
+            return False
+    return True
+
+# Cria várias árvores em posições aleatórias para formar uma floresta, garantindo distância mínima
 tree_positions = []
-for _ in range(20):  # Cria 20 árvores para espalhar pelo mapa
-    x = random.randint(0, width - 60)
-    y = random.randint(0, height - 80)
-    tree_positions.append((x, y))
+max_attempts = 1000  # Número máximo de tentativas para encontrar uma posição válida
+while len(tree_positions) < 20:  # Queremos 20 árvores
+    attempts = 0
+    while attempts < max_attempts:
+        x = random.randint(0, width - 60)
+        y = random.randint(0, height - 80)
+        if is_position_valid(x, y, tree_positions, min_distance=80):
+            tree_positions.append((x, y))
+            break
+        attempts += 1
 
 # Desenha o jogador (arara) usando imagem
 def draw_player():
@@ -137,9 +151,11 @@ while True:
     aim_x = player_x + (player_width // 2) - (aim_width // 2)
     aim_y = player_y - aim_height
 
-    # Limpa a tela e desenha os elementos
-    tela.fill(BLACK)
-    draw_forest()
+    # Limpa a tela com um tom de verde para representar grama
+    tela.fill(GREEN_GRASS)
+
+    # Desenha o cenário
+    draw_forest()  # Desenha a floresta de fundo
     draw_walls()
     draw_enemies()
     draw_player()
