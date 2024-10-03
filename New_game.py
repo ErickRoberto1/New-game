@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 from sys import exit
+import random
 
 pygame.init()
 
@@ -37,7 +38,7 @@ aim_y = player_y - aim_height
 
 # Bala
 bullet_size = 5
-clicks = 0 # controls rate of fire
+clicks = 0  # Controla a taxa de tiro
 bullets = []
 
 # Inimigos
@@ -51,6 +52,17 @@ walls = [
     (100, 100, 20, 320),  # Parede esquerda
     (680, 100, 20, 320),  # Parede direita
 ]
+
+# Carrega e redimensiona a imagem da árvore
+tree_image = pygame.image.load('assets/tree.png')
+tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da árvore
+
+# Cria várias árvores em posições aleatórias para formar uma floresta
+tree_positions = []
+for _ in range(20):  # Cria 20 árvores para espalhar pelo mapa
+    x = random.randint(0, width - 60)
+    y = random.randint(0, height - 80)
+    tree_positions.append((x, y))
 
 # Desenha o jogador (arara) usando imagem
 def draw_player():
@@ -75,6 +87,11 @@ def draw_walls():
 # Desenha as balas
 def draw_bullet(bullet):
     pygame.draw.circle(tela, WHITE, (bullet[0], bullet[1]), bullet_size)
+
+# Desenha as árvores para formar a floresta
+def draw_forest():
+    for pos in tree_positions:
+        tela.blit(tree_image, pos)
 
 # Atualiza a posição das balas
 def update_bullets():
@@ -107,7 +124,7 @@ while True:
     if keys[pygame.K_DOWN]:
         player_y += speed_player
     if keys[pygame.K_SPACE]:
-        if clicks <= 0 :
+        if clicks <= 0:
             # Adiciona uma nova bala na posição da mira
             bullets.append([aim_x + aim_width // 2, aim_y])  # Posição da bala
             clicks += 1
@@ -122,6 +139,7 @@ while True:
 
     # Limpa a tela e desenha os elementos
     tela.fill(BLACK)
+    draw_forest()
     draw_walls()
     draw_enemies()
     draw_player()
