@@ -58,10 +58,6 @@ tree_bullets = []
 # Timer para disparos das arvores
 tree_shoot_timer = 0
 
-# Inimigos
-enemy_size = 20
-enemies = [[200, 150], [250, 150], [300, 100]]
-
 # Paredes ao redor das bordas da tela (todas brancas)
 walls = [
     (0, 0, width, 20),
@@ -147,11 +143,6 @@ def draw_player():
         aim = pygame.draw.rect(tela, WHITE, (aim_x, aim_y, aim_width, aim_height))
     elif aim_direction == "down":
         aim = pygame.draw.rect(tela, WHITE, (aim_x, aim_y + player_height, aim_width, aim_height))
-
-# Desenha os inimigos
-def draw_enemies():
-    for enemy in enemies:
-        pygame.draw.rect(tela, WHITE, (enemy[0], enemy[1], enemy_size, enemy_size))
 
 # Desenha as paredes ao redor da tela
 def draw_walls():
@@ -321,7 +312,6 @@ while True:
     draw_forest_with_fire()  # Desenha as árvores com fogo sobrepondo o topo, se ainda estiverem pegando fogo
     draw_lakes() # Desenha os lagos
     draw_walls()  # Desenha as paredes brancas ao redor do cenário
-    #draw_enemies()  # Desenha os inimigos
     draw_player()  # Desenha o jogador
     update_bullets()  # Atualiza e desenha as balas do jogador
     for bullet in bullets:
