@@ -30,7 +30,7 @@ arara_image = pygame.transform.scale(arara_image, (player_width, player_height))
 player_mask = pygame.mask.from_surface(arara_image)
 
 # Direção do jogador
-facing_right = False  # A arara começa virada para a esquerda
+facing_right = False
 
 # Mira
 aim_width = 5
@@ -69,8 +69,13 @@ tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da
 fire_image = pygame.image.load('assets/fire.png')
 fire_image = pygame.transform.scale(fire_image, (60, 60))  # Ajusta o tamanho do fogo
 
-# Criar máscara para a árvore
+# Carrega e redimensiona a imagem do lago
+lake_image = pygame.image.load('assets/lake.png')
+lake_image = pygame.transform.scale(lake_image, (100, 100))  # Ajusta o tamanho do lago
+
+# Criar máscara para a árvore e o lago
 tree_mask = pygame.mask.from_surface(tree_image)
+lake_mask = pygame.mask.from_surface(lake_image)
 
 # Função para verificar se uma posição está longe o suficiente de outras árvores e do centro
 def is_position_valid(x, y, positions, min_distance):
@@ -91,7 +96,7 @@ trees_on_fire = []  # Lista que indica quais árvores estão pegando fogo
 max_attempts = 1000
 min_distance_between_trees = player_height + 20
 
-while len(tree_positions) < 15:
+while len(tree_positions) < 19:
     attempts = 0
     while attempts < max_attempts:
         x = random.randint(20, width - 80)
@@ -99,6 +104,19 @@ while len(tree_positions) < 15:
         if is_position_valid(x, y, tree_positions, min_distance=min_distance_between_trees):
             tree_positions.append((x, y))
             trees_on_fire.append(True)  # Todas as árvores começam pegando fogo
+            break
+        attempts += 1
+
+# Cria lagos em posições aleatórias garantindo que não colidam com árvores
+lake_positions = []
+while len(lake_positions) < 3:
+    attempts = 0
+    while attempts < max_attempts:
+        x = random.randint(20, width - 120)
+        y = random.randint(20, height - 120)
+        # Garantir que os lagos não estejam na mesma posição das árvores
+        if is_position_valid(x, y, tree_positions, min_distance=150) and is_position_valid(x, y, lake_positions, min_distance=150):
+            lake_positions.append((x, y))
             break
         attempts += 1
 
@@ -130,7 +148,7 @@ def draw_bullet(bullet):
 def draw_tree_bullet(tree_bullet):
     pygame.draw.circle(tela, (255, 0, 0), (tree_bullet[0], tree_bullet[1]), bullet_size)  # Cor vermelha para diferenciar
 
-# Desenha as árvores para formar a floresta e o fogo sobrepondo o topo de cada árvore
+# Desenha as árvores e o fogo sobrepondo o topo de cada árvore
 def draw_forest_with_fire():
     for i, pos in enumerate(tree_positions):
         tela.blit(tree_image, pos)  # Desenha a árvore
@@ -138,6 +156,11 @@ def draw_forest_with_fire():
             fire_x = pos[0]
             fire_y = pos[1] - 20  # Posiciona o fogo para sobrepor o topo da árvore
             tela.blit(fire_image, (fire_x, fire_y))  # Desenha o fogo sobre as folhas da árvore
+
+# Desenha os lagos
+def draw_lakes():
+    for pos in lake_positions:
+        tela.blit(lake_image, pos)
 
 # Atualiza a posição das balas do jogador
 def update_bullets():
@@ -203,7 +226,7 @@ while True:
     aim_x = new_player_x + (player_width // 2) - (aim_width // 2)
     aim_y = new_player_y - aim_height
 
-    # Verifica colisões com as árvores antes de atualizar a posição do jogador
+    # Verifica colisões com as árvores e lagos antes de atualizar a posição do jogador
     new_player_rect = pygame.Rect(new_player_x, new_player_y, player_width, player_height)
     collision = False
 
@@ -216,6 +239,18 @@ while True:
 
         # Verificar a colisão com máscaras
         if tree_mask.overlap(player_mask, (offset_x, offset_y)):
+            collision = True
+            break
+
+    for pos in lake_positions:
+        lake_rect = pygame.Rect(pos[0], pos[1], 100, 100)
+
+        # Calcular a posição relativa entre o lago e o jogador
+        offset_x = new_player_rect.left - lake_rect.left
+        offset_y = new_player_rect.top - lake_rect.top
+
+        # Verificar a colisão com máscaras
+        if lake_mask.overlap(player_mask, (offset_x, offset_y)):
             collision = True
             break
 
@@ -251,6 +286,7 @@ while True:
 
     # Desenha o cenário
     draw_forest_with_fire()  # Desenha as árvores com fogo sobrepondo o topo, se ainda estiverem pegando fogo
+    draw_lakes()  # Desenha os lagos
     draw_walls()  # Desenha as paredes brancas ao redor do cenário
     draw_enemies()  # Desenha os inimigos
     draw_player()  # Desenha o jogador
