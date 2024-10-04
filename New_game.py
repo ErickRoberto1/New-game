@@ -1,4 +1,3 @@
-
 import pygame
 from pygame.locals import *
 from sys import exit
@@ -18,11 +17,6 @@ height = 875
 tela = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Retro Game with Arara Player")
 clock = pygame.time.Clock()
-
-# Background
-'''bakcground_image = pygame.image.load('assets/background.png')
-background = pygame.transform.scale(bakcground_image, (width, height))'''
-# Adiciona o Background Emanuel 
 
 # Player (arara)
 player_width = 40
@@ -46,12 +40,14 @@ aim_x = player_x + (player_width // 2) - (aim_width // 2)
 aim_y = player_y - aim_height
 aim_direction = K_UP
 
-# Bala do jogador
-bullet_size = 5
-bullet_color = BLUE_LIGHT
+# Bala do jogador (gota)
 bullet_speed = 10
 clicks = 0  # Controla a taxa de tiro
 bullets = []
+
+# Carrega e redimensiona a imagem da gota
+drop_image = pygame.image.load('assets/drop.png')
+drop_image = pygame.transform.scale(drop_image, (20, 20))  # Ajusta o tamanho da gota
 
 # Balas das árvores
 tree_bullets = []
@@ -79,10 +75,13 @@ tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da
 lake_image = pygame.image.load('assets/lake.png')
 lake_image = pygame.transform.scale(lake_image, (100, 100))  # Ajusta o tamanho do lago
 
+# Carrega e redimensiona a imagem da fireball
+fireball_image = pygame.image.load('assets/fireball.png')
+fireball_image = pygame.transform.scale(fireball_image, (20, 20))  # Ajusta o tamanho da fireball
+
 # Criar máscara para a árvore e o lago
 tree_mask = pygame.mask.from_surface(tree_image)
 lake_mask = pygame.mask.from_surface(lake_image)
-
 
 # Função para verificar se uma posição está longe o suficiente de outras árvores e do centro
 def is_position_valid(x, y, positions, min_distance):
@@ -150,13 +149,23 @@ def draw_walls():
     for wall in walls:
         pygame.draw.rect(tela, WHITE, wall)
 
-# Desenha as balas
+# Desenha as balas do jogador com a imagem da gota e rotação ajustada
 def draw_bullet(bullet):
-    pygame.draw.circle(tela, bullet_color, (bullet[0], bullet[1]), bullet_size)
+    # Calcula o ângulo da direção do movimento para rotacionar a gota
+    angle = math.degrees(math.atan2(-bullet[3], bullet[2]))
+    # Ajusta a rotação da gota em 180 graus para que a ponta esteja sempre apontando para a direção correta
+    angle += 180
+    rotated_drop = pygame.transform.rotate(drop_image, angle)
+    rect = rotated_drop.get_rect(center=(bullet[0], bullet[1]))
+    tela.blit(rotated_drop, rect.topleft)
 
-# Desenha as balas das árvores
+# Desenha as balas das árvores com a imagem da fireball e rotação ajustada
 def draw_tree_bullet(tree_bullet):
-    pygame.draw.circle(tela, (255, 0, 0), (tree_bullet[0], tree_bullet[1]), bullet_size) # Cor vermelhas para diferenciar
+    # Calcula o ângulo da direção do movimento para rotacionar a fireball
+    angle = math.degrees(math.atan2(-tree_bullet[3], tree_bullet[2])) + 180  # O sinal negativo é para ajustar o eixo Y invertido do Pygame, e +180 para inverter
+    rotated_fireball = pygame.transform.rotate(fireball_image, angle)
+    rect = rotated_fireball.get_rect(center=(tree_bullet[0], tree_bullet[1]))
+    tela.blit(rotated_fireball, rect.topleft)
 
 # Desenha as árvores e o fogo sobrepondo o topo de cada árvore
 def draw_forest_with_fire():
@@ -174,18 +183,11 @@ def draw_lakes():
 
 # Atualiza a posição das balas do jogador
 def update_bullets():
-    global direction
     for bullet in bullets[:]:
-        bullet_rect = pygame.Rect(bullet[0] - bullet_size, bullet[1] - bullet_size, bullet_size * 2, bullet_size * 2)
+        bullet[0] += bullet[2]  # Atualiza posição x com a direção x
+        bullet[1] += bullet[3]  # Atualiza posição y com a direção y
 
-        if aim_direction == K_RIGHT:
-            bullet[0] += bullet_speed # Move a bala para a direita
-        elif aim_direction == K_LEFT: 
-            bullet[0] -= bullet_speed # Move a bala para esquerda
-        elif aim_direction == K_UP: 
-            bullet[1] -= bullet_speed # Move a bala para cima
-        elif aim_direction == K_DOWN:
-            bullet[1] += bullet_speed # Moce a bala para baixo
+        bullet_rect = pygame.Rect(bullet[0] - 10, bullet[1] - 10, 20, 20)  # Tamanho da gota
 
         # Verifica colisão da bala com árvores
         for i, pos in enumerate(tree_positions):
@@ -303,21 +305,31 @@ while True:
     tela.fill(GREEN_GRASS)
 
     # Desenha o cenário
-    # tela.blit(background , (0, 0))
     draw_forest_with_fire()  # Desenha as árvores com fogo sobrepondo o topo, se ainda estiverem pegando fogo
-    draw_lakes() # Desenha os lagos
+    draw_lakes()  # Desenha os lagos
     draw_walls()  # Desenha as paredes brancas ao redor do cenário
     draw_player()  # Desenha o jogador
     update_bullets()  # Atualiza e desenha as balas do jogador
     for bullet in bullets:
         draw_bullet(bullet)
-    update_tree_bullets()
+    update_tree_bullets()  # Atualiza e desenha as balas das árvores
     for tree_bullet in tree_bullets:
         draw_tree_bullet(tree_bullet)
 
     # Disparar as balas do jogador
     if keys[pygame.K_SPACE] and clicks <= 0:
-        bullets.append([aim.x,aim.y]) # Adiciona uma nova bala na posição da mira
+        # Determinar a direção do disparo
+        direction_x, direction_y = 0, 0
+        if aim_direction == K_RIGHT:
+            direction_x = bullet_speed
+        elif aim_direction == K_LEFT:
+            direction_x = -bullet_speed
+        elif aim_direction == K_UP:
+            direction_y = -bullet_speed
+        elif aim_direction == K_DOWN:
+            direction_y = bullet_speed
+
+        bullets.append([aim.x, aim.y, direction_x, direction_y])  # Adiciona uma nova bala com direção
         clicks += 1
 
     pygame.display.update()
