@@ -1,3 +1,4 @@
+
 import pygame
 from pygame.locals import *
 from sys import exit
@@ -9,6 +10,7 @@ pygame.init()
 # Cores
 GREEN_GRASS = (34, 139, 34)  # Cor de fundo verde, semelhante à grama
 WHITE = (255, 255, 255)
+BLUE_LIGHT = (0, 0, 255)
 
 # Tela
 width = 1200
@@ -16,6 +18,10 @@ height = 875
 tela = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Retro Game with Arara Player")
 clock = pygame.time.Clock()
+
+# Background
+bakcground_image = pygame.image.load('assets/background.png')
+background = pygame.transform.scale(bakcground_image, (width, height))
 
 # Player (arara)
 player_width = 40
@@ -30,23 +36,26 @@ arara_image = pygame.transform.scale(arara_image, (player_width, player_height))
 player_mask = pygame.mask.from_surface(arara_image)
 
 # Direção do jogador
-facing_right = False
+facing_right = False  # A arara começa virada para a esquerda
 
 # Mira
 aim_width = 5
 aim_height = 15
 aim_x = player_x + (player_width // 2) - (aim_width // 2)
 aim_y = player_y - aim_height
+aim_direction = "up"
 
 # Bala do jogador
 bullet_size = 5
+bullet_color = BLUE_LIGHT
+bullet_speed = 10
 clicks = 0  # Controla a taxa de tiro
 bullets = []
 
 # Balas das árvores
 tree_bullets = []
 
-# Timer para disparos das árvores
+# Timer para disparos das arvores
 tree_shoot_timer = 0
 
 # Inimigos
@@ -61,13 +70,13 @@ walls = [
     (width - 20, 0, 20, height)
 ]
 
-# Carrega e redimensiona a imagem da árvore
-tree_image = pygame.image.load('assets/tree.png')
-tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da árvore
-
 # Carrega e redimensiona a imagem do fogo
 fire_image = pygame.image.load('assets/fire.png')
 fire_image = pygame.transform.scale(fire_image, (60, 60))  # Ajusta o tamanho do fogo
+
+# Carrega e redimensiona a imagem da árvore
+tree_image = pygame.image.load('assets/tree.png')
+tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da árvore
 
 # Carrega e redimensiona a imagem do lago
 lake_image = pygame.image.load('assets/lake.png')
@@ -76,6 +85,7 @@ lake_image = pygame.transform.scale(lake_image, (100, 100))  # Ajusta o tamanho 
 # Criar máscara para a árvore e o lago
 tree_mask = pygame.mask.from_surface(tree_image)
 lake_mask = pygame.mask.from_surface(lake_image)
+
 
 # Função para verificar se uma posição está longe o suficiente de outras árvores e do centro
 def is_position_valid(x, y, positions, min_distance):
@@ -99,8 +109,8 @@ min_distance_between_trees = player_height + 20
 while len(tree_positions) < 19:
     attempts = 0
     while attempts < max_attempts:
-        x = random.randint(20, width - 80)
-        y = random.randint(20, height - 100)
+        x = random.randint(100, width - 140)
+        y = random.randint(100, height - 160)
         if is_position_valid(x, y, tree_positions, min_distance=min_distance_between_trees):
             tree_positions.append((x, y))
             trees_on_fire.append(True)  # Todas as árvores começam pegando fogo
@@ -122,13 +132,21 @@ while len(lake_positions) < 3:
 
 # Desenha o jogador (arara) usando imagem
 def draw_player():
+    global aim
     if facing_right:
         arara = pygame.transform.flip(arara_image, True, False)
     else:
         arara = arara_image
     tela.blit(arara, (player_x, player_y))
     # Mira do jogador
-    pygame.draw.rect(tela, WHITE, (aim_x, aim_y, aim_width, aim_height))
+    if aim_direction == "right":
+        aim = pygame.draw.rect(tela, WHITE, (player_x + 35, player_y + 20, aim_height, aim_width))
+    elif aim_direction == "left":
+        aim = pygame.draw.rect(tela, WHITE, (player_x - 15, player_y + 20, aim_height, aim_width))
+    elif aim_direction == "up":
+        aim = pygame.draw.rect(tela, WHITE, (aim_x, aim_y, aim_width, aim_height))
+    elif aim_direction == "down":
+        aim = pygame.draw.rect(tela, WHITE, (aim_x, aim_y + player_height, aim_width, aim_height))
 
 # Desenha os inimigos
 def draw_enemies():
@@ -140,13 +158,13 @@ def draw_walls():
     for wall in walls:
         pygame.draw.rect(tela, WHITE, wall)
 
-# Desenha as balas do jogador
+# Desenha as balas
 def draw_bullet(bullet):
-    pygame.draw.circle(tela, WHITE, (bullet[0], bullet[1]), bullet_size)
+    pygame.draw.circle(tela, bullet_color, (bullet[0], bullet[1]), bullet_size)
 
 # Desenha as balas das árvores
 def draw_tree_bullet(tree_bullet):
-    pygame.draw.circle(tela, (255, 0, 0), (tree_bullet[0], tree_bullet[1]), bullet_size)  # Cor vermelha para diferenciar
+    pygame.draw.circle(tela, (255, 0, 0), (tree_bullet[0], tree_bullet[1]), bullet_size) # Cor vermelhas para diferenciar
 
 # Desenha as árvores e o fogo sobrepondo o topo de cada árvore
 def draw_forest_with_fire():
@@ -164,9 +182,18 @@ def draw_lakes():
 
 # Atualiza a posição das balas do jogador
 def update_bullets():
+    global direction
     for bullet in bullets[:]:
-        bullet[1] -= 10  # Move a bala para cima
         bullet_rect = pygame.Rect(bullet[0] - bullet_size, bullet[1] - bullet_size, bullet_size * 2, bullet_size * 2)
+
+        if aim_direction == "right":
+            bullet[0] += bullet_speed  # Move a bala para cima
+        elif aim_direction == "left":
+            bullet[0] -= bullet_speed
+        elif aim_direction == "up":
+            bullet[1] -= bullet_speed
+        elif aim_direction == "down":
+            bullet[1] += bullet_speed
 
         # Verifica colisão da bala com árvores
         for i, pos in enumerate(tree_positions):
@@ -179,7 +206,7 @@ def update_bullets():
                 break
 
         # Remove a bala se sair da tela
-        if bullet[1] < 0:
+        if bullet[1] < 0 or bullet[1] > height or bullet[0] < 0 or bullet[0] > width:  # Remove a bala se sair da tela
             bullets.remove(bullet)
 
 # Atualiza a posição das balas das árvores
@@ -187,7 +214,6 @@ def update_tree_bullets():
     for tree_bullet in tree_bullets[:]:
         tree_bullet[0] += tree_bullet[2]  # Atualiza posição x com a direção x
         tree_bullet[1] += tree_bullet[3]  # Atualiza posição y com a direção y
-
         # Remove a bala se sair da tela
         if tree_bullet[0] < 0 or tree_bullet[0] > width or tree_bullet[1] < 0 or tree_bullet[1] > height:
             tree_bullets.remove(tree_bullet)
@@ -202,20 +228,28 @@ while True:
         if event.type == KEYDOWN:
             if event.key == K_SPACE:
                 clicks = 0
+            if event.key == K_RIGHT:
+                aim_direction = "right"
+            if event.key == K_UP:
+                aim_direction = "up"
+            if event.key == K_LEFT:
+                aim_direction = "left"
+            if event.key == K_DOWN:
+                aim_direction = "down"
 
     # Movimento do player
     keys = pygame.key.get_pressed()
     new_player_x = player_x
     new_player_y = player_y
-    if keys[pygame.K_LEFT]:
+    if keys[pygame.K_a]:
         new_player_x -= speed_player
         facing_right = False
-    if keys[pygame.K_RIGHT]:
+    if keys[pygame.K_d]:
         new_player_x += speed_player
         facing_right = True
-    if keys[pygame.K_UP]:
+    if keys[pygame.K_w]:
         new_player_y -= speed_player
-    if keys[pygame.K_DOWN]:
+    if keys[pygame.K_s]:
         new_player_y += speed_player
 
     # Limites do jogador para evitar sair da tela
@@ -244,11 +278,9 @@ while True:
 
     for pos in lake_positions:
         lake_rect = pygame.Rect(pos[0], pos[1], 100, 100)
-
         # Calcular a posição relativa entre o lago e o jogador
         offset_x = new_player_rect.left - lake_rect.left
         offset_y = new_player_rect.top - lake_rect.top
-
         # Verificar a colisão com máscaras
         if lake_mask.overlap(player_mask, (offset_x, offset_y)):
             collision = True
@@ -285,22 +317,22 @@ while True:
     tela.fill(GREEN_GRASS)
 
     # Desenha o cenário
+    tela.blit(background , (0, 0))
     draw_forest_with_fire()  # Desenha as árvores com fogo sobrepondo o topo, se ainda estiverem pegando fogo
-    draw_lakes()  # Desenha os lagos
+    draw_lakes() # Desenha os lagos
     draw_walls()  # Desenha as paredes brancas ao redor do cenário
-    draw_enemies()  # Desenha os inimigos
+    #draw_enemies()  # Desenha os inimigos
     draw_player()  # Desenha o jogador
     update_bullets()  # Atualiza e desenha as balas do jogador
     for bullet in bullets:
         draw_bullet(bullet)
-
-    update_tree_bullets()  # Atualiza e desenha as balas das árvores
+    update_tree_bullets()
     for tree_bullet in tree_bullets:
         draw_tree_bullet(tree_bullet)
 
     # Disparar as balas do jogador
     if keys[pygame.K_SPACE] and clicks <= 0:
-        bullets.append([aim_x + aim_width // 2, aim_y])  # Adiciona uma nova bala na posição da mira
+        bullets.append([aim.x,aim.y]) # Adiciona uma nova bala na posição da mira
         clicks += 1
 
     pygame.display.update()
