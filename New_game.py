@@ -20,8 +20,9 @@ pygame.display.set_caption("Retro Game with Arara Player")
 clock = pygame.time.Clock()
 
 # Background
-bakcground_image = pygame.image.load('assets/background.png')
-background = pygame.transform.scale(bakcground_image, (width, height))
+'''bakcground_image = pygame.image.load('assets/background.png')
+background = pygame.transform.scale(bakcground_image, (width, height))'''
+# Adiciona o Background Emanuel 
 
 # Player (arara)
 player_width = 40
@@ -43,7 +44,7 @@ aim_width = 5
 aim_height = 15
 aim_x = player_x + (player_width // 2) - (aim_width // 2)
 aim_y = player_y - aim_height
-aim_direction = "up"
+aim_direction = K_UP
 
 # Bala do jogador
 bullet_size = 5
@@ -135,13 +136,13 @@ def draw_player():
         arara = arara_image
     tela.blit(arara, (player_x, player_y))
     # Mira do jogador
-    if aim_direction == "right":
+    if aim_direction == K_RIGHT:
         aim = pygame.draw.rect(tela, WHITE, (player_x + 35, player_y + 20, aim_height, aim_width))
-    elif aim_direction == "left":
+    elif aim_direction == K_LEFT:
         aim = pygame.draw.rect(tela, WHITE, (player_x - 15, player_y + 20, aim_height, aim_width))
-    elif aim_direction == "up":
+    elif aim_direction == K_UP:
         aim = pygame.draw.rect(tela, WHITE, (aim_x, aim_y, aim_width, aim_height))
-    elif aim_direction == "down":
+    elif aim_direction == K_DOWN:
         aim = pygame.draw.rect(tela, WHITE, (aim_x, aim_y + player_height, aim_width, aim_height))
 
 # Desenha as paredes ao redor da tela
@@ -177,14 +178,14 @@ def update_bullets():
     for bullet in bullets[:]:
         bullet_rect = pygame.Rect(bullet[0] - bullet_size, bullet[1] - bullet_size, bullet_size * 2, bullet_size * 2)
 
-        if aim_direction == "right":
-            bullet[0] += bullet_speed  # Move a bala para cima
-        elif aim_direction == "left":
-            bullet[0] -= bullet_speed
-        elif aim_direction == "up":
-            bullet[1] -= bullet_speed
-        elif aim_direction == "down":
-            bullet[1] += bullet_speed
+        if aim_direction == K_RIGHT:
+            bullet[0] += bullet_speed # Move a bala para a direita
+        elif aim_direction == K_LEFT: 
+            bullet[0] -= bullet_speed # Move a bala para esquerda
+        elif aim_direction == K_UP: 
+            bullet[1] -= bullet_speed # Move a bala para cima
+        elif aim_direction == K_DOWN:
+            bullet[1] += bullet_speed # Moce a bala para baixo
 
         # Verifica colisão da bala com árvores
         for i, pos in enumerate(tree_positions):
@@ -219,14 +220,8 @@ while True:
         if event.type == KEYDOWN:
             if event.key == K_SPACE:
                 clicks = 0
-            if event.key == K_RIGHT:
-                aim_direction = "right"
-            if event.key == K_UP:
-                aim_direction = "up"
-            if event.key == K_LEFT:
-                aim_direction = "left"
-            if event.key == K_DOWN:
-                aim_direction = "down"
+            if event.key in [K_DOWN, K_UP, K_RIGHT, K_LEFT]:
+                aim_direction = event.key
 
     # Movimento do player
     keys = pygame.key.get_pressed()
@@ -308,7 +303,7 @@ while True:
     tela.fill(GREEN_GRASS)
 
     # Desenha o cenário
-    tela.blit(background , (0, 0))
+    # tela.blit(background , (0, 0))
     draw_forest_with_fire()  # Desenha as árvores com fogo sobrepondo o topo, se ainda estiverem pegando fogo
     draw_lakes() # Desenha os lagos
     draw_walls()  # Desenha as paredes brancas ao redor do cenário
