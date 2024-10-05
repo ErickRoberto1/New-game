@@ -83,15 +83,18 @@ walls = [
     (width - 20, 0, 20, height)
 ]
 
-# Carrega e redimensiona a imagem do fogo
-fire_image = pygame.image.load('assets/images/fire.png')
-fire_image = pygame.transform.scale(fire_image, (60, 60))  # Ajusta o tamanho do fogo
+fire_frames = [
+    pygame.transform.scale(pygame.image.load('assets/images/fire_1.png'), (60,60)),
+    pygame.transform.scale(pygame.image.load('assets/images/fire_2.png'), (60,60)),
+    pygame.transform.scale(pygame.image.load('assets/images/fire_3.png'), (60,60))
+]
+current_fire_frame = 0
+frame_delay = 5
+frame_counter = 0
 
-# Carrega e redimensiona a imagem da árvore
 tree_image = pygame.image.load('assets/images/tree.png')
 tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da árvore
 
-# Carrega e redimensiona a imagem da fireball
 fireball_image = pygame.image.load('assets/images/fireball.png')
 fireball_image = pygame.transform.scale(fireball_image, (20, 20))  # Ajusta o tamanho da fireball
 
@@ -172,11 +175,12 @@ def draw_tree_bullet(tree_bullet):
 # Desenha as árvores e o fogo sobrepondo o topo de cada árvore
 def draw_forest_with_fire():
     for i, pos in enumerate(tree_positions):
+        # Desenhar a árvore
         tela.blit(tree_image, pos)
         if trees_on_fire[i]:
             fire_x = pos[0]
-            fire_y = pos[1] - 20
-            tela.blit(fire_image, (fire_x, fire_y))
+            fire_y = pos[1] - 20  # Ajuste para posicionar o fogo sobre a árvore
+            tela.blit(fire_frames[current_fire_frame], (fire_x, fire_y))
 
 
 # Desenha a barra de vida do jogador
@@ -253,6 +257,8 @@ while True:
             if event.key in [K_DOWN, K_UP, K_RIGHT, K_LEFT]:
                 aim_direction = event.key
 
+
+
     # Movimento do player
     keys = pygame.key.get_pressed()
     new_player_x = player_x
@@ -268,7 +274,12 @@ while True:
     if keys[pygame.K_s]:
         new_player_y += speed_player
 
-    # Limites do jogador para evitar sair da tela
+    frame_counter += 1
+    if frame_counter >= frame_delay:
+        frame_counter = 0
+        current_fire_frame = (current_fire_frame + 1) % len(fire_frames)
+
+        # Limites do jogador para evitar sair da tela
     new_player_x = max(20, min(width - player_width - 20, new_player_x))
     new_player_y = max(20, min(height - player_height - 20, new_player_y))
 
