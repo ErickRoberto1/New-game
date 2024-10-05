@@ -205,10 +205,17 @@ def update_bullets():
         for i, pos in enumerate(tree_positions):
             tree_rect = pygame.Rect(pos[0], pos[1], 60, 80)
 
-            if bullet_rect.colliderect(tree_rect) and trees_on_fire[i]:
-                trees_on_fire[i] = False
-                bullets.remove(bullet)
-                break
+            if bullet_rect.colliderect(tree_rect):
+                if trees_on_fire[i]:  # Se a árvore estiver pegando fogo
+                    trees_on_fire[i] = False
+                    bullets.remove(bullet)
+                else:  # Se a árvore não estiver pegando fogo
+                    # Refletir a bala
+                    if bullet[2] != 0:  # Refletir horizontalmente
+                        bullet[2] = -bullet[2]
+                    if bullet[3] != 0:  # Refletir verticalmente
+                        bullet[3] = -bullet[3]
+                break  # Saia do loop após uma colisão
 
         if bullet[1] < 0 or bullet[1] > height or bullet[0] < 0 or bullet[0] > width:
             bullets.remove(bullet)
