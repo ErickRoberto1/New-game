@@ -14,6 +14,8 @@ WHITE = (255, 255, 255)
 BLUE_LIGHT = (0, 0, 255)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+ORANGE = (255, 165, 0)
 
 # Tela
 width = 1200
@@ -35,7 +37,7 @@ player_height = 60
 player_x = width // 2
 player_y = height // 2
 speed_player = 5
-player_health = 20
+player_health = 15
 arara_image = pygame.image.load('assets/images/arara.png')
 arara_image = pygame.transform.scale(arara_image, (player_width, player_height))
 player_mask = pygame.mask.from_surface(arara_image)
@@ -50,6 +52,9 @@ blink_interval = 100
 # Background
 background_image = pygame.image.load('assets/images/background.png')
 background_image = pygame.transform.scale(background_image, (width, height))
+
+heart_image = pygame.image.load('assets/images/heart.png')
+heart_image = pygame.transform.scale(heart_image, (40, 40))
 
 
 # Mira
@@ -134,32 +139,34 @@ def load_background():
 
 
 def draw_hud(elapsed_time, player_health, current_phase):
-    # Desenhar o fundo do HUD
     pygame.draw.rect(tela, BLACK, (0, 0, width, hud_height))
-
-    # Fonte para o HUD
     font = pygame.font.Font(None, 36)
 
-    # Texto do tempo de jogo
     time_text = font.render(f"Time: {elapsed_time // 1000}s", True, WHITE)
     tela.blit(time_text, (20, 10))
 
-    # Texto da fase atual
     phase_text = font.render(f"Phase: {current_phase}", True, WHITE)
     tela.blit(phase_text, (width // 2 - 50, 10))
 
-    # Texto da barra de vida
-    health_bar_text = font.render(f"Health:", True, WHITE)
-    tela.blit(health_bar_text, (20, 50))
+    tela.blit(heart_image, (20, 50))
 
     # Desenhar a barra de vida
+    bar_x = 70
+    bar_y = 60
     bar_width = 200
     bar_height = 20
-    health_ratio = player_health / 10
+    health_ratio = player_health / 15
     current_bar_width = bar_width * health_ratio
 
-    pygame.draw.rect(tela, RED, (120, 55, bar_width, bar_height))
-    pygame.draw.rect(tela, BLUE_LIGHT, (120, 55, current_bar_width, bar_height))
+    if health_ratio > 0.6:
+        bar_color = GREEN
+    elif health_ratio > 0.3:
+        bar_color = ORANGE
+    else:
+        bar_color = RED
+
+    pygame.draw.rect(tela, WHITE, (bar_x, bar_y, bar_width, bar_height))
+    pygame.draw.rect(tela, bar_color, (bar_x, bar_y, current_bar_width, bar_height))
 
 # Desenha o jogador (arara) usando imagem
 def draw_player():
@@ -291,7 +298,6 @@ while True:
                 aim_direction = event.key
 
 
-
     # Movimento do player
     keys = pygame.key.get_pressed()
     new_player_x = player_x
@@ -307,14 +313,16 @@ while True:
     if keys[pygame.K_s]:
         new_player_y += speed_player
 
+    # Limites do jogador para evitar sair da tela
+    new_player_x = max(20, min(width - player_width - 20, new_player_x))
+    new_player_y = max(hud_height, min(height - player_height - 20, new_player_y))
+
     frame_counter += 1
     if frame_counter >= frame_delay:
         frame_counter = 0
         current_fire_frame = (current_fire_frame + 1) % len(fire_frames)
 
-        # Limites do jogador para evitar sair da tela
-    new_player_x = max(20, min(width - player_width - 20, new_player_x))
-    new_player_y = max(20, min(height - player_height - 20, new_player_y))
+
 
     # Atualiza a mira
     aim_x = new_player_x + (player_width // 2) - (aim_width // 2)
