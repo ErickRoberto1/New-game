@@ -1,4 +1,4 @@
-
+import os
 import pygame
 from pygame.locals import *
 from sys import exit
@@ -6,6 +6,7 @@ import random
 import math
 
 pygame.init()
+pygame.mixer.init()
 
 # Cores
 GREEN_GRASS = (34, 139, 34)  # Cor de fundo verde, semelhante à grama
@@ -20,6 +21,12 @@ tela = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Retro Game with Arara Player")
 clock = pygame.time.Clock()
 
+# Music and soundeffects
+sounds = 'sounds'
+pygame.mixer.music.load(os.path.join(sounds, 'backsoundtrackB.mp3'))
+pygame.mixer.music.play(-1)
+fire = pygame.mixer.Sound(os.path.join(sounds, 'fire_sound.wav'))
+
 # Player (arara)
 player_width = 40
 player_height = 60
@@ -29,6 +36,12 @@ speed_player = 5
 player_health = 10  # Vida do jogador (máximo 10)
 arara_image = pygame.image.load('assets/arara.png')
 arara_image = pygame.transform.scale(arara_image, (player_width, player_height))
+
+# Ghost State
+hit = False
+blink_timer = 0
+blink_interval = 100
+
 
 # Background
 background_image = pygame.image.load('assets/background.png')
@@ -140,11 +153,12 @@ while len(lake_positions) < 3:
 # Desenha o jogador (arara) usando imagem
 def draw_player():
     global aim
-    if facing_right:
-        arara = pygame.transform.flip(arara_image, True, False)
-    else:
-        arara = arara_image
-    tela.blit(arara, (player_x, player_y))
+    if not hit:
+        if facing_right:
+            arara = pygame.transform.flip(arara_image, True, False)
+        else:
+            arara = arara_image
+        tela.blit(arara, (player_x, player_y))
     # Mira do jogador
     if aim_direction == K_RIGHT:
         aim = pygame.draw.rect(tela, WHITE, (player_x + 35, player_y + 20, aim_height, aim_width))
@@ -218,7 +232,7 @@ def update_bullets():
 
 # Atualiza a posição das balas das árvores
 def update_tree_bullets():
-    global player_health, player_x, player_y
+    global player_health, player_x, player_y, hit
     for tree_bullet in tree_bullets[:]:
         tree_bullet[0] += tree_bullet[2]
         tree_bullet[1] += tree_bullet[3]
@@ -226,9 +240,13 @@ def update_tree_bullets():
 
         # Verificar colisão da bala com o jogador
         player_rect = pygame.Rect(player_x, player_y, player_width, player_height)
-        if tree_bullet_rect.colliderect(player_rect):
+        if tree_bullet_rect.colliderect(player_rect) and not hit:
+            hit = True
             tree_bullets.remove(tree_bullet)
-            player_health -= 1
+            pygame.mixer.Sound.play(fire)
+            pygame.mixer.Sound.fadeout(fire,2000)
+            if hit:
+                player_health -= 1
             if player_health <= 0:
                 # Reiniciar o jogo quando a vida do jogador for 0
                 player_x = width // 2
@@ -241,6 +259,7 @@ def update_tree_bullets():
 
         if tree_bullet[0] < 0 or tree_bullet[0] > width or tree_bullet[1] < 0 or tree_bullet[1] > height:
             tree_bullets.remove(tree_bullet)
+
 
 # Loop principal do jogo
 while True:
@@ -345,4 +364,8 @@ while True:
         bullets.append([aim.x,aim.y, direction_x, direction_y])
         clicks += 1
 
+    blink_timer += clock.get_time()
+    if blink_timer >= blink_interval:
+        hit = False
+        blink_timer = 0
     pygame.display.update()
