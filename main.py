@@ -242,13 +242,17 @@ def update_bullets():
                     trees_on_fire[i] = False
                     bullets.remove(bullet)
                 else:  # Se a árvore não estiver pegando fogo
-                    # Refletir a bala
-                    if bullet[2] != 0:  # Refletir horizontalmente
-                        bullet[2] = -bullet[2]
-                    if bullet[3] != 0:  # Refletir verticalmente
-                        bullet[3] = -bullet[3]
-                break  # Saia do loop após uma colisão
+                    if bullet[4]: # remove a gota que já foi rebatida
+                        bullets.remove(bullet)
+                    else: # rebade a gota
+                        if bullet[2] != 0:  # rebate horizontalmente
+                            bullet[2] = -bullet[2]
+                        if bullet[3] != 0:  # rebate verticalmente
+                            bullet[3] = -bullet[3]
+                        bullet[4] = True # indica que a  gota já foi rebatida
+                break  # Sai do loop após uma colisão
 
+        # remove gotas que sairam da tela
         if bullet[1] < 0 or bullet[1] > height or bullet[0] < 0 or bullet[0] > width:
             bullets.remove(bullet)
 
@@ -385,7 +389,7 @@ while True:
             direction_y = -bullet_speed
         elif aim_direction == K_DOWN:
             direction_y = bullet_speed
-        bullets.append([aim.x,aim.y, direction_x, direction_y])
+        bullets.append([aim.x,aim.y, direction_x, direction_y, False])
         clicks += 1
 
     blink_timer += clock.get_time()
