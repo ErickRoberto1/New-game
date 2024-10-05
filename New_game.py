@@ -342,7 +342,7 @@ while True:
             direction_y = -bullet_speed
         elif aim_direction == K_DOWN:
             direction_y = bullet_speed
-        bullets.append([aim_x + aim_width // 2, aim_y, direction_x, direction_y])
+        bullets.append([aim.x,aim.y, direction_x, direction_y])
         clicks += 1
 
     pygame.display.update()
