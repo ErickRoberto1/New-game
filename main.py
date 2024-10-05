@@ -13,10 +13,12 @@ GREEN_GRASS = (34, 139, 34)  # Cor de fundo verde, semelhante à grama
 WHITE = (255, 255, 255)
 BLUE_LIGHT = (0, 0, 255)
 RED = (255, 0, 0)
+BLACK = (0, 0, 0)
 
 # Tela
 width = 1200
 height = 875
+hud_height = 100
 tela = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Retro Game with Arara Player")
 clock = pygame.time.Clock()
@@ -33,9 +35,11 @@ player_height = 60
 player_x = width // 2
 player_y = height // 2
 speed_player = 5
-player_health = 10  # Vida do jogador (máximo 10)
+player_health = 20
 arara_image = pygame.image.load('assets/images/arara.png')
 arara_image = pygame.transform.scale(arara_image, (player_width, player_height))
+player_mask = pygame.mask.from_surface(arara_image)
+facing_right = False
 
 # Ghost State
 hit = False
@@ -47,11 +51,6 @@ blink_interval = 100
 background_image = pygame.image.load('assets/images/background.png')
 background_image = pygame.transform.scale(background_image, (width, height))
 
-# Criar máscara para o jogador
-player_mask = pygame.mask.from_surface(arara_image)
-
-# Direção do jogador
-facing_right = False  # A arara começa virada para a esquerda
 
 # Mira
 aim_width = 5
@@ -61,19 +60,12 @@ aim_y = player_y - aim_height
 aim_direction = K_UP
 
 # Bala do jogador (gota)
+drop_image = pygame.image.load('assets/images/drop.png')
+drop_image = pygame.transform.scale(drop_image, (20, 20))
 bullet_speed = 10
-clicks = 0  # Controla a taxa de tiro
+clicks = 0
 bullets = []
 
-# Carrega e redimensiona a imagem da gota
-drop_image = pygame.image.load('assets/images/drop.png')
-drop_image = pygame.transform.scale(drop_image, (20, 20))  # Ajusta o tamanho da gota
-
-# Balas das árvores
-tree_bullets = []
-
-# Timer para disparos das árvores
-tree_shoot_timer = 0
 
 # Paredes ao redor das bordas da tela (todas brancas)
 walls = [
@@ -93,13 +85,18 @@ frame_delay = 5
 frame_counter = 0
 
 tree_image = pygame.image.load('assets/images/tree.png')
-tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da árvore
+tree_image = pygame.transform.scale(tree_image, (60, 80))
+tree_mask = pygame.mask.from_surface(tree_image)
+tree_bullets = []
+tree_shoot_timer = 0
 
 fireball_image = pygame.image.load('assets/images/fireball.png')
-fireball_image = pygame.transform.scale(fireball_image, (20, 20))  # Ajusta o tamanho da fireball
+fireball_image = pygame.transform.scale(fireball_image, (20, 20))
 
-# Criar máscara para a árvore e o lago
-tree_mask = pygame.mask.from_surface(tree_image)
+#Variáveis do jogo
+start_time = pygame.time.get_ticks()
+current_phase = 1
+
 
 # Função para verificar se uma posição está longe o suficiente de outras árvores e do centro
 def is_position_valid(x, y, positions, min_distance):
@@ -135,6 +132,34 @@ while len(tree_positions) < 19:
 def load_background():
     tela.blit(background_image, (0, 0))
 
+
+def draw_hud(elapsed_time, player_health, current_phase):
+    # Desenhar o fundo do HUD
+    pygame.draw.rect(tela, BLACK, (0, 0, width, hud_height))
+
+    # Fonte para o HUD
+    font = pygame.font.Font(None, 36)
+
+    # Texto do tempo de jogo
+    time_text = font.render(f"Time: {elapsed_time // 1000}s", True, WHITE)
+    tela.blit(time_text, (20, 10))
+
+    # Texto da fase atual
+    phase_text = font.render(f"Phase: {current_phase}", True, WHITE)
+    tela.blit(phase_text, (width // 2 - 50, 10))
+
+    # Texto da barra de vida
+    health_bar_text = font.render(f"Health:", True, WHITE)
+    tela.blit(health_bar_text, (20, 50))
+
+    # Desenhar a barra de vida
+    bar_width = 200
+    bar_height = 20
+    health_ratio = player_health / 10
+    current_bar_width = bar_width * health_ratio
+
+    pygame.draw.rect(tela, RED, (120, 55, bar_width, bar_height))
+    pygame.draw.rect(tela, BLUE_LIGHT, (120, 55, current_bar_width, bar_height))
 
 # Desenha o jogador (arara) usando imagem
 def draw_player():
@@ -254,6 +279,7 @@ def update_tree_bullets():
 # Loop principal do jogo
 while True:
     clock.tick(60)
+    elapsed_time = pygame.time.get_ticks() - start_time
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -333,6 +359,7 @@ while True:
     draw_walls()
     draw_player()
     draw_health_bar()
+    draw_hud(elapsed_time, player_health, current_phase)
     update_bullets()
     for bullet in bullets:
         draw_bullet(bullet)
