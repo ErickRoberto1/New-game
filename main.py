@@ -91,17 +91,12 @@ fire_image = pygame.transform.scale(fire_image, (60, 60))  # Ajusta o tamanho do
 tree_image = pygame.image.load('assets/images/tree.png')
 tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da árvore
 
-# Carrega e redimensiona a imagem do lago
-lake_image = pygame.image.load('assets/images/lake.png')
-lake_image = pygame.transform.scale(lake_image, (100, 100))  # Ajusta o tamanho do lago
-
 # Carrega e redimensiona a imagem da fireball
 fireball_image = pygame.image.load('assets/images/fireball.png')
 fireball_image = pygame.transform.scale(fireball_image, (20, 20))  # Ajusta o tamanho da fireball
 
 # Criar máscara para a árvore e o lago
 tree_mask = pygame.mask.from_surface(tree_image)
-lake_mask = pygame.mask.from_surface(lake_image)
 
 # Função para verificar se uma posição está longe o suficiente de outras árvores e do centro
 def is_position_valid(x, y, positions, min_distance):
@@ -137,18 +132,6 @@ while len(tree_positions) < 19:
 def load_background():
     tela.blit(background_image, (0, 0))
 
-# Cria lagos em posições aleatórias garantindo que não colidam com árvores
-lake_positions = []
-while len(lake_positions) < 3:
-    attempts = 0
-    while attempts < max_attempts:
-        x = random.randint(20, width - 120)
-        y = random.randint(20, height - 120)
-        # Garantir que os lagos não estejam na mesma posição das árvores
-        if is_position_valid(x, y, tree_positions, min_distance=150) and is_position_valid(x, y, lake_positions, min_distance=150):
-            lake_positions.append((x, y))
-            break
-        attempts += 1
 
 # Desenha o jogador (arara) usando imagem
 def draw_player():
@@ -195,10 +178,6 @@ def draw_forest_with_fire():
             fire_y = pos[1] - 20
             tela.blit(fire_image, (fire_x, fire_y))
 
-# Desenha os lagos
-def draw_lakes():
-    for pos in lake_positions:
-        tela.blit(lake_image, pos)
 
 # Desenha a barra de vida do jogador
 def draw_health_bar():
@@ -309,13 +288,6 @@ while True:
             collision = True
             break
 
-    for pos in lake_positions:
-        lake_rect = pygame.Rect(pos[0], pos[1], 100, 100)
-        offset_x = new_player_rect.left - lake_rect.left
-        offset_y = new_player_rect.top - lake_rect.top
-        if lake_mask.overlap(player_mask, (offset_x, offset_y)):
-            collision = True
-            break
 
     if not collision:
         player_x = new_player_x
@@ -340,7 +312,6 @@ while True:
     tela.fill(GREEN_GRASS)
     load_background()
     draw_forest_with_fire()
-    draw_lakes()
     draw_walls()
     draw_player()
     draw_health_bar()
