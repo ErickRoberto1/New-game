@@ -22,7 +22,7 @@ pygame.display.set_caption("Retro Game with Arara Player")
 clock = pygame.time.Clock()
 
 # Music and soundeffects
-sounds = 'sounds'
+sounds = 'assets/sounds'
 pygame.mixer.music.load(os.path.join(sounds, 'backsoundtrackB.mp3'))
 pygame.mixer.music.play(-1)
 fire = pygame.mixer.Sound(os.path.join(sounds, 'fire_sound.wav'))
@@ -34,7 +34,7 @@ player_x = width // 2
 player_y = height // 2
 speed_player = 5
 player_health = 10  # Vida do jogador (máximo 10)
-arara_image = pygame.image.load('assets/arara.png')
+arara_image = pygame.image.load('assets/images/arara.png')
 arara_image = pygame.transform.scale(arara_image, (player_width, player_height))
 
 # Ghost State
@@ -44,7 +44,7 @@ blink_interval = 100
 
 
 # Background
-background_image = pygame.image.load('assets/background.png')
+background_image = pygame.image.load('assets/images/background.png')
 background_image = pygame.transform.scale(background_image, (width, height))
 
 # Criar máscara para o jogador
@@ -66,7 +66,7 @@ clicks = 0  # Controla a taxa de tiro
 bullets = []
 
 # Carrega e redimensiona a imagem da gota
-drop_image = pygame.image.load('assets/drop.png')
+drop_image = pygame.image.load('assets/images/drop.png')
 drop_image = pygame.transform.scale(drop_image, (20, 20))  # Ajusta o tamanho da gota
 
 # Balas das árvores
@@ -84,19 +84,19 @@ walls = [
 ]
 
 # Carrega e redimensiona a imagem do fogo
-fire_image = pygame.image.load('assets/fire.png')
+fire_image = pygame.image.load('assets/images/fire.png')
 fire_image = pygame.transform.scale(fire_image, (60, 60))  # Ajusta o tamanho do fogo
 
 # Carrega e redimensiona a imagem da árvore
-tree_image = pygame.image.load('assets/tree.png')
+tree_image = pygame.image.load('assets/images/tree.png')
 tree_image = pygame.transform.scale(tree_image, (60, 80))  # Ajusta o tamanho da árvore
 
 # Carrega e redimensiona a imagem do lago
-lake_image = pygame.image.load('assets/lake.png')
+lake_image = pygame.image.load('assets/images/lake.png')
 lake_image = pygame.transform.scale(lake_image, (100, 100))  # Ajusta o tamanho do lago
 
 # Carrega e redimensiona a imagem da fireball
-fireball_image = pygame.image.load('assets/fireball.png')
+fireball_image = pygame.image.load('assets/images/fireball.png')
 fireball_image = pygame.transform.scale(fireball_image, (20, 20))  # Ajusta o tamanho da fireball
 
 # Criar máscara para a árvore e o lago
