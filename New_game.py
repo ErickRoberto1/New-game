@@ -1,3 +1,4 @@
+
 import pygame
 from pygame.locals import *
 from sys import exit
@@ -28,6 +29,10 @@ speed_player = 5
 player_health = 10  # Vida do jogador (máximo 10)
 arara_image = pygame.image.load('assets/arara.png')
 arara_image = pygame.transform.scale(arara_image, (player_width, player_height))
+
+# Background
+background_image = pygame.image.load('assets/background.png')
+background_image = pygame.transform.scale(background_image, (width, height))
 
 # Criar máscara para o jogador
 player_mask = pygame.mask.from_surface(arara_image)
@@ -114,6 +119,10 @@ while len(tree_positions) < 19:
             trees_on_fire.append(True)  # Todas as árvores começam pegando fogo
             break
         attempts += 1
+
+# Carrega o background
+def load_background():
+    tela.blit(background_image, (0, 0))
 
 # Cria lagos em posições aleatórias garantindo que não colidam com árvores
 lake_positions = []
@@ -310,6 +319,7 @@ while True:
                 tree_bullets.append([pos[0] + 30, pos[1] + 40, direction_x, direction_y])
 
     tela.fill(GREEN_GRASS)
+    load_background()
     draw_forest_with_fire()
     draw_lakes()
     draw_walls()
