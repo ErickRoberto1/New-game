@@ -33,6 +33,7 @@ def sound_game():
     pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.5)
 fire = pygame.mixer.Sound(os.path.join(sounds, 'fire_sound.wav'))
+bullet_sound = pygame.mixer.Sound(os.path.join(sounds, 'bullet_sound.mp3'))
 
 # Player (arara)
 player_width = 40
@@ -225,6 +226,8 @@ def draw_bullet(bullet):
     rect = drop_image.get_rect(center=(bullet[0], bullet[1]))
     tela.blit(drop_image, rect.topleft)
 
+
+
 # Desenha as balas das árvores com a imagem da fireball e rotação ajustada
 def draw_tree_bullet(tree_bullet):
     angle = math.degrees(math.atan2(-tree_bullet[3], tree_bullet[2])) + 180
@@ -272,7 +275,7 @@ def update_bullets():
                 else:  # Se a árvore não estiver pegando fogo
                     if bullet[4]: # remove a gota que já foi rebatida
                         bullets.remove(bullet)
-                    else: # rebade a gota
+                    else: # rebate a gota
                         if bullet[2] != 0:  # rebate horizontalmente
                             bullet[2] = -bullet[2]
                         if bullet[3] != 0:  # rebate verticalmente
@@ -356,6 +359,9 @@ while True:
             pygame.quit()
             exit()
         if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                pygame.quit()
+                exit()
             if event.key == K_SPACE:
                 clicks = 0
             if event.key in [K_DOWN, K_UP, K_RIGHT, K_LEFT]:
@@ -442,6 +448,7 @@ while True:
 
     if keys[pygame.K_SPACE] and clicks <= 0:
         direction_x, direction_y = 0, 0
+        pygame.mixer.Sound.play(bullet_sound)
         if aim_direction == K_RIGHT:
             direction_x = bullet_speed
         elif aim_direction == K_LEFT:
