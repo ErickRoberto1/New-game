@@ -25,10 +25,11 @@ tela = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Retro Game with Arara Player")
 clock = pygame.time.Clock()
 
-# Music and soundeffects
+# Music and sound effects
 sounds = 'assets/sounds'
 pygame.mixer.music.load(os.path.join(sounds, 'backsoundtrackB.mp3'))
 pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.5)
 fire = pygame.mixer.Sound(os.path.join(sounds, 'fire_sound.wav'))
 
 # Player (arara)
@@ -129,7 +130,7 @@ while len(tree_positions) < 19:
         y = random.randint(100, height - 160)
         if is_position_valid(x, y, tree_positions, min_distance=min_distance_between_trees):
             tree_positions.append((x, y))
-            trees_on_fire.append(True)  # Todas as árvores começam pegando fogo
+            trees_on_fire.append(True)
             break
         attempts += 1
 
@@ -142,10 +143,10 @@ def draw_hud(elapsed_time, player_health, current_phase):
     pygame.draw.rect(tela, BLACK, (0, 0, width, hud_height))
     font = pygame.font.Font(None, 36)
 
-    time_text = font.render(f"Time: {elapsed_time // 1000}s", True, WHITE)
+    time_text = font.render(f"TEMPO: {elapsed_time // 1000}s", True, WHITE)
     tela.blit(time_text, (20, 10))
 
-    phase_text = font.render(f"Phase: {current_phase}", True, WHITE)
+    phase_text = font.render(f"LEVEL: {current_phase}", True, WHITE)
     tela.blit(phase_text, (width // 2 - 50, 10))
 
     tela.blit(heart_image, (20, 50))
@@ -155,6 +156,7 @@ def draw_hud(elapsed_time, player_health, current_phase):
     bar_y = 60
     bar_width = 200
     bar_height = 20
+    pixel_size = 4
     health_ratio = player_health / 15
     current_bar_width = bar_width * health_ratio
 
@@ -166,7 +168,30 @@ def draw_hud(elapsed_time, player_health, current_phase):
         bar_color = RED
 
     pygame.draw.rect(tela, WHITE, (bar_x, bar_y, bar_width, bar_height))
-    pygame.draw.rect(tela, bar_color, (bar_x, bar_y, current_bar_width, bar_height))
+
+    for i in range(0, bar_height // 2, pixel_size):
+        pygame.draw.rect(tela, WHITE, (bar_x - i, bar_y + i, pixel_size, pixel_size))
+        pygame.draw.rect(tela, WHITE, (bar_x + bar_width - pixel_size + i, bar_y + i, pixel_size, pixel_size))
+        pygame.draw.rect(tela, WHITE, (bar_x - i, bar_y + bar_height - pixel_size - i, pixel_size, pixel_size))
+        pygame.draw.rect(tela, WHITE, (
+        bar_x + bar_width - pixel_size + i, bar_y + bar_height - pixel_size - i, pixel_size, pixel_size))
+
+        # Desenhar a barra de vida atual com aparência pixelada
+    if current_bar_width > 0:
+        pygame.draw.rect(tela, bar_color, (bar_x, bar_y, current_bar_width, bar_height))
+
+        # Bordas arredondadas pixeladas da barra de vida atual
+        for i in range(0, bar_height // 2, pixel_size):
+            if current_bar_width > i:
+                pygame.draw.rect(tela, bar_color, (bar_x - i, bar_y + i, pixel_size, pixel_size))
+                pygame.draw.rect(tela, bar_color, (
+                bar_x + min(current_bar_width, bar_width) - pixel_size + i, bar_y + i, pixel_size, pixel_size))
+                pygame.draw.rect(tela, bar_color,
+                                 (bar_x - i, bar_y + bar_height - pixel_size - i, pixel_size, pixel_size))
+                pygame.draw.rect(tela, bar_color, (
+                bar_x + min(current_bar_width, bar_width) - pixel_size + i, bar_y + bar_height - pixel_size - i,
+                pixel_size, pixel_size))
+
 
 # Desenha o jogador (arara) usando imagem
 def draw_player():
@@ -187,10 +212,11 @@ def draw_player():
     elif aim_direction == K_DOWN:
         aim = pygame.draw.rect(tela, WHITE, (aim_x, aim_y + player_height, aim_width, aim_height))
 
+
 # Desenha as paredes ao redor da tela
 def draw_walls():
     for wall in walls:
-        pygame.draw.rect(tela, WHITE, wall)
+        pygame.draw.rect(tela, BLACK, wall)
 
 # Desenha as balas do jogador com a imagem da gota (sem ajuste de ângulo)
 def draw_bullet(bullet):
@@ -274,10 +300,11 @@ def update_tree_bullets():
             if hit:
                 player_health -= 1
             if player_health <= 0:
+
                 # Reiniciar o jogo quando a vida do jogador for 0
                 player_x = width // 2
                 player_y = height // 2
-                player_health = 10
+                player_health = 15
                 bullets.clear()
                 tree_bullets.clear()
                 trees_on_fire[:] = [True] * len(trees_on_fire)
@@ -306,6 +333,7 @@ while True:
     keys = pygame.key.get_pressed()
     new_player_x = player_x
     new_player_y = player_y
+
     if keys[pygame.K_a]:
         new_player_x -= speed_player
         facing_right = False
@@ -317,6 +345,7 @@ while True:
     if keys[pygame.K_s]:
         new_player_y += speed_player
 
+
     # Limites do jogador para evitar sair da tela
     new_player_x = max(20, min(width - player_width - 20, new_player_x))
     new_player_y = max(hud_height, min(height - player_height - 20, new_player_y))
@@ -325,7 +354,6 @@ while True:
     if frame_counter >= frame_delay:
         frame_counter = 0
         current_fire_frame = (current_fire_frame + 1) % len(fire_frames)
-
 
 
     # Atualiza a mira
