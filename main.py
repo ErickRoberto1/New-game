@@ -53,6 +53,16 @@ blink_timer = 0
 blink_interval = 100
 
 
+#Fontes
+title_font_path = os.path.join('assets/fonts', 'Gorditas-Regular.ttf')
+title_size = 74
+title_font = pygame.font.Font(title_font_path, title_size)
+
+secondary_font_path = os.path.join('assets/fonts', 'PressStart2P-Regular.ttf')
+secondary_size = 26
+secondary_font = pygame.font.Font(secondary_font_path, secondary_size)
+
+
 # Background
 background_image = pygame.image.load('assets/images/background.png')
 background_image = pygame.transform.scale(background_image, (width, height))
@@ -322,15 +332,13 @@ def update_tree_bullets():
 def show_menu():
     while True:
         load_background()
-        font = pygame.font.Font(None, 74)
-        title_text = font.render("Super Macaw", True, WHITE)
-        start_text = font.render("Tecle ENTER para começar", True, WHITE)
-        exit_text = font.render("Tecle ESC para sair", True, WHITE)
-
+        title_text = title_font.render("SUPER MACAW", True, WHITE)
+        start_text = secondary_font.render("Tecle ENTER para começar", True, WHITE)
+        exit_text = secondary_font.render("Tecle ESC para sair", True, WHITE)
         # desenha o texto e centraliza na tela
-        tela.blit(title_text, (width // 2 - title_text.get_width() // 2, height // 2 - 100))
+        tela.blit(title_text, (width // 2 - title_text.get_width() // 2, height // 2 - 140))
         tela.blit(start_text, (width // 2 - start_text.get_width() // 2, height // 2))
-        tela.blit(exit_text, (width // 2 - exit_text.get_width() // 2, height // 2 + 100))
+        tela.blit(exit_text, (width // 2 - exit_text.get_width() // 2, height // 2 + 60))
 
         for event in pygame.event.get():
             if event.type == QUIT:
