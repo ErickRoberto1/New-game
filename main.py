@@ -85,6 +85,10 @@ bullet_speed = 10
 clicks = 0
 bullets = []
 
+#Mira do jogador
+aim_image = pygame.image.load('assets/images/water_gun.png')
+aim_image = pygame.transform.scale(aim_image, (50, 50))
+
 
 # Paredes ao redor das bordas da tela (todas brancas)
 walls = [
@@ -215,15 +219,32 @@ def draw_player():
         else:
             arara = arara_image
         tela.blit(arara, (player_x, player_y))
-    # Mira do jogador
+
+    # Obtém o retângulo delimitador da máscara do jogador (arara)
+    player_rect = player_mask.get_bounding_rects()[0]
+
+    # Atualiza a posição da mira do jogador com base na posição do jogador e distância padronizada
     if aim_direction == K_RIGHT:
-        aim = pygame.draw.rect(tela, WHITE, (player_x + 35, player_y + 20, aim_height, aim_width))
+        aim_pos = (player_x + player_width + 10,
+                   player_y + player_height // 4)  # Arma à direita, ligeiramente acima do centro vertical
+        rotated_aim = pygame.transform.rotate(aim_image, 0)  # Sem rotação
     elif aim_direction == K_LEFT:
-        aim = pygame.draw.rect(tela, WHITE, (player_x - 15, player_y + 20, aim_height, aim_width))
+        aim_pos = (player_x - aim_image.get_width() - 10, player_y + player_height // 4)  # Arma à esquerda
+        rotated_aim = pygame.transform.flip(aim_image, True, False)  # Espelha a imagem horizontalmente
     elif aim_direction == K_UP:
-        aim = pygame.draw.rect(tela, WHITE, (aim_x, aim_y, aim_width, aim_height))
+        aim_pos = (
+        player_x + player_width // 2 - aim_image.get_width() // 2, player_y - aim_image.get_height() - 10)  # Arma acima
+        rotated_aim = pygame.transform.rotate(aim_image, 90)  # Rotaciona 90 graus para cima
     elif aim_direction == K_DOWN:
-        aim = pygame.draw.rect(tela, WHITE, (aim_x, aim_y + player_height, aim_width, aim_height))
+        aim_pos = (
+        player_x + player_width // 2 - aim_image.get_width() // 2, player_y + player_height + 10)  # Arma abaixo
+        rotated_aim = pygame.transform.rotate(aim_image, -90)  # Rotaciona -90 graus para baixo
+
+    # Desenha a mira (arma) na tela
+    tela.blit(rotated_aim, aim_pos)
+
+    # Desenha a mira (arma) na tela
+    tela.blit(rotated_aim, aim_pos)
 
 
 # Desenha as paredes ao redor da tela
@@ -252,7 +273,7 @@ def draw_forest_with_fire():
         tela.blit(tree_image, pos)
         if trees_on_fire[i]:
             fire_x = pos[0]
-            fire_y = pos[1] - 20  # Ajuste para posicionar o fogo sobre a árvore
+            fire_y = pos[1] - 20
             tela.blit(fire_frames[current_fire_frame], (fire_x, fire_y))
 
 
@@ -267,11 +288,10 @@ def draw_health_bar():
     pygame.draw.rect(tela, BLUE_LIGHT, (20, 20, current_bar_width, bar_height))
 
 
-# Atualiza a posição das balas do jogador
 def update_bullets():
     for bullet in bullets[:]:
-        bullet[0] += bullet[2]
-        bullet[1] += bullet[3]
+        bullet[0] += bullet[2]  # Atualiza a posição x da bala
+        bullet[1] += bullet[3]  # Atualiza a posição y da bala
         bullet_rect = pygame.Rect(bullet[0] - 10, bullet[1] - 10, 20, 20)
 
         # Verifica colisão da bala com árvores
@@ -279,21 +299,24 @@ def update_bullets():
             tree_rect = pygame.Rect(pos[0], pos[1], 60, 80)
 
             if bullet_rect.colliderect(tree_rect):
-                if trees_on_fire[i]:  # Se a árvore estiver pegando fogo
+                if trees_on_fire[i]:
+                    # Se a árvore está pegando fogo, apague o fogo e remova a bala
                     trees_on_fire[i] = False
                     bullets.remove(bullet)
-                else:  # Se a árvore não estiver pegando fogo
-                    if bullet[4]: # remove a gota que já foi rebatida
+                    break
+                else:
+                    # Se a árvore não está pegando fogo, verifica se a bala já colidiu
+                    if not bullet[4]:
+                        # Inverter a direção da bala
+                        bullet[2] = -bullet[2]
+                        bullet[3] = -bullet[3]
+                        bullet[4] = True
+                    else:
+                        # Caso a bala já tenha colidido antes, removê-la
                         bullets.remove(bullet)
-                    else: # rebate a gota
-                        if bullet[2] != 0:  # rebate horizontalmente
-                            bullet[2] = -bullet[2]
-                        if bullet[3] != 0:  # rebate verticalmente
-                            bullet[3] = -bullet[3]
-                        bullet[4] = True # indica que a  gota já foi rebatida
-                break  # Sai do loop após uma colisão
+                    break
 
-        # remove gotas que sairam da tela
+        # Remove a bala se sair da tela
         if bullet[1] < 0 or bullet[1] > height or bullet[0] < 0 or bullet[0] > width:
             bullets.remove(bullet)
 
@@ -335,7 +358,8 @@ def show_menu():
         title_text = title_font.render("SUPER MACAW", True, WHITE)
         start_text = secondary_font.render("Tecle ENTER para começar", True, WHITE)
         exit_text = secondary_font.render("Tecle ESC para sair", True, WHITE)
-        # desenha o texto e centraliza na tela
+
+
         tela.blit(title_text, (width // 2 - title_text.get_width() // 2, height // 2 - 140))
         tela.blit(start_text, (width // 2 - start_text.get_width() // 2, height // 2))
         tela.blit(exit_text, (width // 2 - exit_text.get_width() // 2, height // 2 + 60))
@@ -354,8 +378,6 @@ def show_menu():
         pygame.display.update()
 
 show_menu()
-
-# inicia o som principal do jogo
 sound_game()
 
 # Loop principal do jogo
@@ -454,18 +476,30 @@ while True:
     for tree_bullet in tree_bullets:
         draw_tree_bullet(tree_bullet)
 
+    # Disparar as balas do jogador
     if keys[pygame.K_SPACE] and clicks <= 0:
         direction_x, direction_y = 0, 0
         pygame.mixer.Sound.play(bullet_sound)
+        bullet_x, bullet_y = player_x, player_y
+
         if aim_direction == K_RIGHT:
             direction_x = bullet_speed
+            bullet_x = player_x + 35
+            bullet_y = player_y + 20
         elif aim_direction == K_LEFT:
             direction_x = -bullet_speed
+            bullet_x = player_x - 15
+            bullet_y = player_y + 20
         elif aim_direction == K_UP:
             direction_y = -bullet_speed
+            bullet_x = aim_x
+            bullet_y = aim_y
         elif aim_direction == K_DOWN:
             direction_y = bullet_speed
-        bullets.append([aim.x,aim.y, direction_x, direction_y, False])
+            bullet_x = aim_x
+            bullet_y = aim_y + player_height
+
+        bullets.append([bullet_x, bullet_y, direction_x, direction_y, False])
         clicks += 1
 
     blink_timer += clock.get_time()
