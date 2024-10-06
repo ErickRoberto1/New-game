@@ -30,10 +30,11 @@ sounds = 'assets/sounds'
 # função com o som do jogo
 def sound_game():
     pygame.mixer.music.load(os.path.join(sounds, 'backsoundtrackB.mp3'))
-    pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(-1,0.0,3000)
+pygame.mixer.music.set_volume(0.7)
 fire = pygame.mixer.Sound(os.path.join(sounds, 'fire_sound.wav'))
 bullet_sound = pygame.mixer.Sound(os.path.join(sounds, 'bullet_sound.mp3'))
+fire_extinguish = pygame.mixer.Sound(os.path.join(sounds, 'fire_extinguish.mp3'))
 
 # Player (arara)
 player_width = 40
@@ -72,7 +73,7 @@ heart_image = pygame.transform.scale(heart_image, (40, 40))
 
 
 # Mira
-aim_width = 5
+aim_width = 2
 aim_height = 15
 aim_x = player_x + (player_width // 2) - (aim_width // 2)
 aim_y = player_y - aim_height
@@ -212,7 +213,7 @@ def draw_hud(elapsed_time, player_health, current_phase):
 
 # Desenha o jogador (arara) usando imagem
 def draw_player():
-    global aim
+    global aim, player_rect
     if not hit:
         if facing_right:
             arara = pygame.transform.flip(arara_image, True, False)
@@ -228,17 +229,21 @@ def draw_player():
         aim_pos = (player_x + player_width + 10,
                    player_y + player_height // 4)  # Arma à direita, ligeiramente acima do centro vertical
         rotated_aim = pygame.transform.rotate(aim_image, 0)  # Sem rotação
+        aim = pygame.draw.rect(tela, WHITE, (player_x + 84, player_y + 42, aim_height, aim_width))
     elif aim_direction == K_LEFT:
         aim_pos = (player_x - aim_image.get_width() - 10, player_y + player_height // 4)  # Arma à esquerda
         rotated_aim = pygame.transform.flip(aim_image, True, False)  # Espelha a imagem horizontalmente
+        aim = pygame.draw.rect(tela, WHITE, (player_x - 58, player_y + 42, aim_height, aim_width))
     elif aim_direction == K_UP:
         aim_pos = (
         player_x + player_width // 2 - aim_image.get_width() // 2, player_y - aim_image.get_height() - 10)  # Arma acima
         rotated_aim = pygame.transform.rotate(aim_image, 90)  # Rotaciona 90 graus para cima
+        aim = pygame.draw.rect(tela, WHITE, (aim_x + 3, aim_y - 45, aim_width, aim_height))
     elif aim_direction == K_DOWN:
         aim_pos = (
         player_x + player_width // 2 - aim_image.get_width() // 2, player_y + player_height + 10)  # Arma abaixo
         rotated_aim = pygame.transform.rotate(aim_image, -90)  # Rotaciona -90 graus para baixo
+        aim = pygame.draw.rect(tela, WHITE, (aim_x - 3, aim_y + player_height + 58, aim_width, aim_height))
 
     # Desenha a mira (arma) na tela
     tela.blit(rotated_aim, aim_pos)
@@ -302,6 +307,8 @@ def update_bullets():
                 if trees_on_fire[i]:
                     # Se a árvore está pegando fogo, apague o fogo e remova a bala
                     trees_on_fire[i] = False
+                    pygame.mixer.Sound.play(fire_extinguish)
+                    pygame.mixer.Sound.fadeout(fire_extinguish, 2000)
                     bullets.remove(bullet)
                     break
                 else:
@@ -499,7 +506,7 @@ while True:
             bullet_x = aim_x
             bullet_y = aim_y + player_height
 
-        bullets.append([bullet_x, bullet_y, direction_x, direction_y, False])
+        bullets.append([aim.x, aim.y, direction_x, direction_y, False])
         clicks += 1
 
     blink_timer += clock.get_time()
