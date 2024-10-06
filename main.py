@@ -27,8 +27,10 @@ clock = pygame.time.Clock()
 
 # Music and sound effects
 sounds = 'assets/sounds'
-pygame.mixer.music.load(os.path.join(sounds, 'backsoundtrackB.mp3'))
-pygame.mixer.music.play(-1)
+# função com o som do jogo
+def sound_game():
+    pygame.mixer.music.load(os.path.join(sounds, 'backsoundtrackB.mp3'))
+    pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.5)
 fire = pygame.mixer.Sound(os.path.join(sounds, 'fire_sound.wav'))
 
@@ -313,6 +315,37 @@ def update_tree_bullets():
         if tree_bullet[0] < 0 or tree_bullet[0] > width or tree_bullet[1] < 0 or tree_bullet[1] > height:
             tree_bullets.remove(tree_bullet)
 
+# Função para o menu inicial
+def show_menu():
+    while True:
+        load_background()
+        font = pygame.font.Font(None, 74)
+        title = font.render("Super Macaw", True, WHITE)
+        start = font.render("Tecle ENTER para começar", True, WHITE)
+        exit = font.render("Tecle ESC para sair", True, WHITE)
+
+        # desenha o texto e centraliza na tela
+        tela.blit(title, (width // 2 - title.get_width() // 2, height // 2 - 100))
+        tela.blit(start, (width // 2 - start.get_width() // 2, height // 2))
+        tela.blit(exit, (width // 2 - exit.get_width() // 2, height // 2 + 100))
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                exit()
+            if event.type == KEYDOWN:
+                if event.key == K_RETURN:
+                    return  # começa o jogo
+                if event.key == K_ESCAPE:
+                    pygame.quit() # fecha o jogo
+                    exit()
+
+        pygame.display.update()
+
+show_menu()
+
+# inicia o som principal do jogo
+sound_game()
 
 # Loop principal do jogo
 while True:
