@@ -320,14 +320,14 @@ def show_menu():
     while True:
         load_background()
         font = pygame.font.Font(None, 74)
-        title = font.render("Super Macaw", True, WHITE)
-        start = font.render("Tecle ENTER para começar", True, WHITE)
-        exit = font.render("Tecle ESC para sair", True, WHITE)
+        title_text = font.render("Super Macaw", True, WHITE)
+        start_text = font.render("Tecle ENTER para começar", True, WHITE)
+        exit_text = font.render("Tecle ESC para sair", True, WHITE)
 
         # desenha o texto e centraliza na tela
-        tela.blit(title, (width // 2 - title.get_width() // 2, height // 2 - 100))
-        tela.blit(start, (width // 2 - start.get_width() // 2, height // 2))
-        tela.blit(exit, (width // 2 - exit.get_width() // 2, height // 2 + 100))
+        tela.blit(title_text, (width // 2 - title_text.get_width() // 2, height // 2 - 100))
+        tela.blit(start_text, (width // 2 - start_text.get_width() // 2, height // 2))
+        tela.blit(exit_text, (width // 2 - exit_text.get_width() // 2, height // 2 + 100))
 
         for event in pygame.event.get():
             if event.type == QUIT:
