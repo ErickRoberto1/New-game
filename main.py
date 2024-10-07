@@ -493,7 +493,7 @@ while True:
                 if current_phase == 1:
                     tree_bullet_speed = 4
                 elif current_phase > current_phase - 1:
-                    tree_bullet_speed += 0.03
+                    tree_bullet_speed += 0.01
                 direction_x *= tree_bullet_speed
                 direction_y *= tree_bullet_speed
                 tree_bullets.append([pos[0] + 30, pos[1] + 40, direction_x, direction_y])
