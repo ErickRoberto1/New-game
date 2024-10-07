@@ -9,7 +9,7 @@ pygame.init()
 pygame.mixer.init()
 
 # Cores
-GREEN_GRASS = (34, 139, 34)  # Cor de fundo verde, semelhante à grama
+GREEN_GRASS = (34, 139, 34)
 WHITE = (255, 255, 255)
 BLUE_LIGHT = (0, 0, 255)
 RED = (255, 0, 0)
@@ -82,7 +82,7 @@ aim_direction = K_UP
 # Bala do jogador (gota)
 drop_image = pygame.image.load('assets/images/drop.png')
 drop_image = pygame.transform.scale(drop_image, (20, 20))
-bullet_speed = 10
+bullet_speed = 5
 clicks = 0
 bullets = []
 
@@ -142,7 +142,7 @@ def is_position_valid(x, y, positions, min_distance):
 
 # Cria várias árvores em posições aleatórias para formar uma floresta, garantindo distância mínima
 tree_positions = []
-trees_on_fire = []  # Lista que indica quais árvores estão pegando fogo
+trees_on_fire = []
 max_attempts = 1000
 min_distance_between_trees = player_height + 20
 
@@ -171,9 +171,9 @@ def create_trees():
 def reset_trees():
     global trees_on_fire, tree_positions
     trees_on_fire = []
-    trees_on_fire[:] = [True] * len(trees_on_fire) # todas as arvores em chamas
-    tree_positions = []  # reinicia as posições das árvores
-    create_trees()  # cria novas árvores para a próxima fase
+    trees_on_fire[:] = [True] * len(trees_on_fire)
+    tree_positions = []
+    create_trees()
 
 # Carrega o background
 def load_background():
@@ -251,29 +251,27 @@ def draw_player():
     # Atualiza a posição da mira do jogador com base na posição do jogador e distância padronizada
     if aim_direction == K_RIGHT:
         aim_pos = (player_x + player_width + 10,
-                   player_y + player_height // 4)  # Arma à direita, ligeiramente acima do centro vertical
+                   player_y + player_height // 4)
         rotated_aim = pygame.transform.rotate(aim_image, 0)  # Sem rotação
         aim = pygame.draw.rect(tela, WHITE, (player_x + 84, player_y + 42, aim_height, aim_width))
     elif aim_direction == K_LEFT:
-        aim_pos = (player_x - aim_image.get_width() - 10, player_y + player_height // 4)  # Arma à esquerda
-        rotated_aim = pygame.transform.flip(aim_image, True, False)  # Espelha a imagem horizontalmente
+        aim_pos = (player_x - aim_image.get_width() - 10, player_y + player_height // 4)
+        rotated_aim = pygame.transform.flip(aim_image, True, False)
         aim = pygame.draw.rect(tela, WHITE, (player_x - 58, player_y + 42, aim_height, aim_width))
     elif aim_direction == K_UP:
         aim_pos = (
-        player_x + player_width // 2 - aim_image.get_width() // 2, player_y - aim_image.get_height() - 10)  # Arma acima
-        rotated_aim = pygame.transform.rotate(aim_image, 90)  # Rotaciona 90 graus para cima
+        player_x + player_width // 2 - aim_image.get_width() // 2, player_y - aim_image.get_height() - 10)
+        rotated_aim = pygame.transform.rotate(aim_image, 90)
         aim = pygame.draw.rect(tela, WHITE, (aim_x + 3, aim_y - 45, aim_width, aim_height))
     elif aim_direction == K_DOWN:
         aim_pos = (
-        player_x + player_width // 2 - aim_image.get_width() // 2, player_y + player_height + 10)  # Arma abaixo
-        rotated_aim = pygame.transform.rotate(aim_image, -90)  # Rotaciona -90 graus para baixo
+        player_x + player_width // 2 - aim_image.get_width() // 2, player_y + player_height + 10)
+        rotated_aim = pygame.transform.rotate(aim_image, -90)
         aim = pygame.draw.rect(tela, WHITE, (aim_x - 3, aim_y + player_height + 58, aim_width, aim_height))
 
     # Desenha a mira (arma) na tela
     tela.blit(rotated_aim, aim_pos)
 
-    # Desenha a mira (arma) na tela
-    tela.blit(rotated_aim, aim_pos)
 
 # Desenha as paredes ao redor da tela
 def draw_walls():
@@ -315,8 +313,8 @@ def draw_health_bar():
 def update_bullets():
     global score, points
     for bullet in bullets[:]:
-        bullet[0] += bullet[2]  # Atualiza a posição x da bala
-        bullet[1] += bullet[3]  # Atualiza a posição y da bala
+        bullet[0] += bullet[2]
+        bullet[1] += bullet[3]
         bullet_rect = pygame.Rect(bullet[0] - 10, bullet[1] - 10, 20, 20)
 
         # Verifica colisão da bala com árvores
@@ -325,7 +323,6 @@ def update_bullets():
 
             if bullet_rect.colliderect(tree_rect):
                 if trees_on_fire[i]:
-                    # Se a árvore está pegando fogo, apague o fogo e remova a bala
                     trees_on_fire[i] = False
                     pygame.mixer.Sound.play(fire_extinguish)
                     pygame.mixer.Sound.fadeout(fire_extinguish, 2000)
@@ -334,14 +331,11 @@ def update_bullets():
                     print(points)
                     break
                 else:
-                    # Se a árvore não está pegando fogo, verifica se a bala já colidiu
                     if not bullet[4]:
-                        # Inverter a direção da bala
                         bullet[2] = -bullet[2]
                         bullet[3] = -bullet[3]
                         bullet[4] = True
                     else:
-                        # Caso a bala já tenha colidido antes, removê-la
                         bullets.remove(bullet)
                     break
 
@@ -399,9 +393,9 @@ def show_menu():
                 exit()
             if event.type == KEYDOWN:
                 if event.key == K_RETURN:
-                    return  # começa o jogo
+                    return
                 if event.key == K_ESCAPE:
-                    pygame.quit() # fecha o jogo
+                    pygame.quit()
                     exit()
 
         pygame.display.update()
@@ -491,7 +485,7 @@ while True:
                 if current_phase == 1:
                     tree_bullet_speed = 4
                 elif current_phase > current_phase - 1:
-                    tree_bullet_speed += 0.05
+                    tree_bullet_speed += 0.03
                 direction_x *= tree_bullet_speed
                 direction_y *= tree_bullet_speed
                 tree_bullets.append([pos[0] + 30, pos[1] + 40, direction_x, direction_y])
@@ -542,7 +536,7 @@ while True:
         if not fire_tree:
             count_trees_fire += 1
         if count_trees_fire == len(trees_on_fire):
-            reset_trees()  # reseta as árvores nas pra próximas fases
+            reset_trees()
             current_phase += 1
             if current_phase > current_phase - 2 :
                 points += 5
