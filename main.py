@@ -120,7 +120,8 @@ fireball_image = pygame.transform.scale(fireball_image, (20, 20))
 #Variáveis do jogo
 start_time = pygame.time.get_ticks()
 current_phase = 1
-
+tree_quantity = 5
+shoot_timer = 0
 
 # Função para verificar se uma posição está longe o suficiente de outras árvores e do centro
 def is_position_valid(x, y, positions, min_distance):
@@ -143,8 +144,15 @@ min_distance_between_trees = player_height + 20
 
 # função que cria as árvores
 def create_trees():
-    global tree_positions, trees_on_fire
-    while len(tree_positions) < 19:
+    global tree_positions, trees_on_fire, tree_quantity, shoot_timer
+    if current_phase == 1:
+        tree_quantity = 5
+        shoot_timer = 5000
+    elif current_phase > current_phase-1:
+        tree_quantity += 3
+        shoot_timer -= 300
+
+    while len(tree_positions) < tree_quantity:
         attempts = 0
         while attempts < max_attempts:
             x = random.randint(100, width - 140)
@@ -460,7 +468,7 @@ while True:
         player_y = new_player_y
 
     tree_shoot_timer += clock.get_time()
-    if tree_shoot_timer >= 4000:
+    if tree_shoot_timer >= shoot_timer:
         tree_shoot_timer = 0
         for i, pos in enumerate(tree_positions):
             if trees_on_fire[i]:
@@ -521,8 +529,8 @@ while True:
         if not fire_tree:
             count_trees_fire += 1
         if count_trees_fire == len(trees_on_fire):
-            current_phase += 1
             reset_trees()  # reseta as árvores nas pra próximas fases
+            current_phase += 1
 
     blink_timer += clock.get_time()
     if blink_timer >= blink_interval:
