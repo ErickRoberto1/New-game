@@ -192,7 +192,7 @@ def draw_hud(elapsed_time, player_health, current_phase) :
     pygame.draw.rect(tela, BLACK, (0, 0, width, hud_height))
     font = pygame.font.Font(None, 36)
 
-    time_text = font.render(f"TIME: {elapsed_time // 100}s", True, WHITE)
+    time_text = font.render(f"TIME: {elapsed_time // 53}s", True, WHITE)
     tela.blit(time_text, (20, 10))
 
     phase_text = font.render(f"LEVEL: {current_phase}", True, WHITE)
@@ -583,7 +583,7 @@ while True :
         tela.blit(try_again_text, (width // 2 - try_again_text.get_width() // 2, height // 2))
         score_text = secondary_font.render(f"SCORE FINAL: {score}", True, WHITE)
         tela.blit(score_text, (width // 2 - score_text.get_width() // 2, height // 4))
-        
+
 
 
 
