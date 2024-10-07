@@ -141,21 +141,30 @@ trees_on_fire = []  # Lista que indica quais árvores estão pegando fogo
 max_attempts = 1000
 min_distance_between_trees = player_height + 20
 
-while len(tree_positions) < 19:
-    attempts = 0
-    while attempts < max_attempts:
-        x = random.randint(100, width - 140)
-        y = random.randint(100, height - 160)
-        if is_position_valid(x, y, tree_positions, min_distance=min_distance_between_trees):
-            tree_positions.append((x, y))
-            trees_on_fire.append(True)
-            break
-        attempts += 1
+# função que cria as árvores
+def create_trees():
+    global tree_positions, trees_on_fire
+    while len(tree_positions) < 19:
+        attempts = 0
+        while attempts < max_attempts:
+            x = random.randint(100, width - 140)
+            y = random.randint(100, height - 160)
+            if is_position_valid(x, y, tree_positions, min_distance=min_distance_between_trees):
+                tree_positions.append((x, y))
+                trees_on_fire.append(True)
+                break
+            attempts += 1
+
+# reinicia o estado das árvores para a próxima fase
+def reset_trees():
+    global trees_on_fire, tree_positions
+    trees_on_fire[:] = [True] * len(trees_on_fire) # todas as arvores em chamas
+    tree_positions = []  # reinicia as posições das árvores
+    create_trees()  # cria novas árvores para a próxima fase
 
 # Carrega o background
 def load_background():
     tela.blit(background_image, (0, 0))
-
 
 def draw_hud(elapsed_time, player_health, current_phase):
     pygame.draw.rect(tela, BLACK, (0, 0, width, hud_height))
@@ -210,7 +219,6 @@ def draw_hud(elapsed_time, player_health, current_phase):
                 bar_x + min(current_bar_width, bar_width) - pixel_size + i, bar_y + bar_height - pixel_size - i,
                 pixel_size, pixel_size))
 
-
 # Desenha o jogador (arara) usando imagem
 def draw_player():
     global aim, player_rect
@@ -251,7 +259,6 @@ def draw_player():
     # Desenha a mira (arma) na tela
     tela.blit(rotated_aim, aim_pos)
 
-
 # Desenha as paredes ao redor da tela
 def draw_walls():
     for wall in walls:
@@ -261,8 +268,6 @@ def draw_walls():
 def draw_bullet(bullet):
     rect = drop_image.get_rect(center=(bullet[0], bullet[1]))
     tela.blit(drop_image, rect.topleft)
-
-
 
 # Desenha as balas das árvores com a imagem da fireball e rotação ajustada
 def draw_tree_bullet(tree_bullet):
@@ -281,7 +286,6 @@ def draw_forest_with_fire():
             fire_y = pos[1] - 20
             tela.blit(fire_frames[current_fire_frame], (fire_x, fire_y))
 
-
 # Desenha a barra de vida do jogador
 def draw_health_bar():
     bar_width = 200
@@ -291,7 +295,6 @@ def draw_health_bar():
 
     pygame.draw.rect(tela, RED, (20, 20, bar_width, bar_height))
     pygame.draw.rect(tela, BLUE_LIGHT, (20, 20, current_bar_width, bar_height))
-
 
 def update_bullets():
     for bullet in bullets[:]:
@@ -387,6 +390,9 @@ def show_menu():
 show_menu()
 sound_game()
 
+# cria as árvores no início do jogo
+create_trees()
+
 # Loop principal do jogo
 while True:
     clock.tick(60)
@@ -448,7 +454,6 @@ while True:
             collision = True
             break
 
-
     if not collision:
         player_x = new_player_x
         player_y = new_player_y
@@ -508,6 +513,15 @@ while True:
 
         bullets.append([aim.x, aim.y, direction_x, direction_y, False])
         clicks += 1
+
+    # verifica se todas as árvores estão apagadas
+    count_trees_fire = 0
+    for fire_tree in trees_on_fire:
+        if not fire_tree:
+            count_trees_fire += 1
+        if count_trees_fire == len(trees_on_fire):
+            current_phase += 1
+            reset_trees()  # reseta as árvores nas pra próximas fases
 
     blink_timer += clock.get_time()
     if blink_timer >= blink_interval:
