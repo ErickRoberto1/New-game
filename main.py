@@ -538,6 +538,10 @@ while True:
         if count_trees_fire == len(trees_on_fire):
             reset_trees()
             current_phase += 1
+
+            # reseta a vida em cada fase
+            player_health = 15
+
             if current_phase > current_phase - 2 :
                 points += 5
 
