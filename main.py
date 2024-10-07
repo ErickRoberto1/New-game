@@ -153,7 +153,7 @@ def create_trees():
         tree_quantity = 5
         shoot_timer = 5000
     elif current_phase > current_phase-1:
-        tree_quantity += 3
+        tree_quantity += 2
         shoot_timer -= 300
 
     while len(tree_positions) < tree_quantity:
