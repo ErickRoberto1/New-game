@@ -357,7 +357,7 @@ def update_bullets() :
                     break
 
         # Remove a bala se sair da tela
-        if bullet[1] < 0 or bullet[1] > height or bullet[0] < 0 or bullet[0] > width :
+        if bullet[1] < hud_height + 5 or bullet[1] > height - 30 or bullet[0] < 30 or bullet[0] > width - 30:
             bullets.remove(bullet)
 
 
@@ -389,7 +389,7 @@ def update_tree_bullets() :
                 trees_on_fire[:] = [True] * len(trees_on_fire)
                 break
 
-        if tree_bullet[0] < 0 or tree_bullet[0] > width or tree_bullet[1] < 0 or tree_bullet[1] > height :
+        if tree_bullet[1] < hud_height + 5 or tree_bullet[1] > height - 30 or tree_bullet[0] < 30 or tree_bullet[0] > width - 30 :
             tree_bullets.remove(tree_bullet)
 
 
