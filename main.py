@@ -378,8 +378,8 @@ def show_menu():
     while True:
         load_background()
         title_text = title_font.render("SUPER MACAW", True, WHITE)
-        start_text = secondary_font.render("Tecle ENTER para começar", True, WHITE)
-        exit_text = secondary_font.render("Tecle ESC para sair", True, WHITE)
+        start_text = secondary_font.render("Press ENTER to start", True, WHITE)
+        exit_text = secondary_font.render("Press ESC to leave", True, WHITE)
 
 
         tela.blit(title_text, (width // 2 - title_text.get_width() // 2, height // 2 - 140))
