@@ -272,7 +272,6 @@ def draw_player():
     # Desenha a mira (arma) na tela
     tela.blit(rotated_aim, aim_pos)
 
-
 # Desenha as paredes ao redor da tela
 def draw_walls():
     for wall in walls:
@@ -406,6 +405,18 @@ sound_game()
 # cria as árvores no início do jogo
 create_trees()
 
+phase_message = ""
+show_phase_message = False
+message_start_time = 0
+
+# função que desenha em cada nível
+def draw_phase_message(message):
+    if show_phase_message:
+        font = pygame.font.Font(None, 74)
+        text = font.render(message, True, WHITE)
+        text_rect = text.get_rect(center=(width // 2, height // 2))
+        tela.blit(text, text_rect)
+
 # Loop principal do jogo
 while True:
     clock.tick(60)
@@ -423,7 +434,6 @@ while True:
             if event.key in [K_DOWN, K_UP, K_RIGHT, K_LEFT]:
                 aim_direction = event.key
 
-
     # Movimento do player
     keys = pygame.key.get_pressed()
     new_player_x = player_x
@@ -440,7 +450,6 @@ while True:
     if keys[pygame.K_s]:
         new_player_y += speed_player
 
-
     # Limites do jogador para evitar sair da tela
     new_player_x = max(20, min(width - player_width - 20, new_player_x))
     new_player_y = max(hud_height, min(height - player_height - 20, new_player_y))
@@ -449,7 +458,6 @@ while True:
     if frame_counter >= frame_delay:
         frame_counter = 0
         current_fire_frame = (current_fire_frame + 1) % len(fire_frames)
-
 
     # Atualiza a mira
     aim_x = new_player_x + (player_width // 2) - (aim_width // 2)
@@ -544,6 +552,18 @@ while True:
 
             if current_phase > current_phase - 2 :
                 points += 5
+
+            phase_message = f"Fase {current_phase}"
+            show_phase_message = True
+            message_start_time = pygame.time.get_ticks()
+       
+    # Update phase message display
+    if show_phase_message:
+        current_time = pygame.time.get_ticks()
+        if current_time - message_start_time < 2000:  # mostra por 3 segundos
+            draw_phase_message(phase_message)
+        else:
+            show_phase_message = False  # esconde depois de 3 segundos        
 
     blink_timer += clock.get_time()
     if blink_timer >= blink_interval:
