@@ -5,17 +5,30 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     line-height: 1.6;
     background-color: #f4f4f4;
     color: #333;
 }
 
 header {
-    background: #007BFF;
+    background: linear-gradient(135deg, #007BFF, #0056b3);
     color: white;
-    padding: 30px;
+    padding: 40px;
     text-align: center;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    font-size: 2.8em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+header p {
+    font-size: 1.2em;
+    margin-top: 5px;
 }
 
 main {
@@ -25,6 +38,16 @@ main {
     background: white;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.cover-section {
+    margin-bottom: 20px;
+}
+
+.cover-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
 }
 
 .video-section {
@@ -40,3 +63,29 @@ main {
 .content-section {
     margin-top: 20px;
 }
+
+.content-section h2 {
+    border-bottom: 2px solid #007BFF;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.github-section {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.github-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.github-link:hover {
+    background-color: #218838;
+}
+
