@@ -598,6 +598,8 @@ while True :
         if count_trees_fire == len(trees_on_fire) :
             reset_trees()
             current_phase += 1
+            player_x = width // 2
+            player_y = height // 2
 
             # reseta a vida em cada fase
             player_health = 15
