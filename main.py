@@ -113,6 +113,7 @@ tree_image = pygame.transform.scale(tree_image, (60, 80))
 tree_mask = pygame.mask.from_surface(tree_image)
 tree_bullets = []
 tree_shoot_timer = 0
+tree_bullet_speed = 0
 
 fireball_image = pygame.image.load('assets/images/fireball.png')
 fireball_image = pygame.transform.scale(fireball_image, (20, 20))
@@ -122,6 +123,9 @@ start_time = pygame.time.get_ticks()
 current_phase = 1
 tree_quantity = 5
 shoot_timer = 0
+score = 0
+points = 5
+
 
 # Função para verificar se uma posição está longe o suficiente de outras árvores e do centro
 def is_position_valid(x, y, positions, min_distance):
@@ -184,6 +188,9 @@ def draw_hud(elapsed_time, player_health, current_phase):
 
     phase_text = font.render(f"LEVEL: {current_phase}", True, WHITE)
     tela.blit(phase_text, (width // 2 - 50, 10))
+
+    score_text = font.render(f"SCORE: {score}", True, WHITE)
+    tela.blit(score_text, (width - 200 , 10))
 
     tela.blit(heart_image, (20, 50))
 
@@ -306,6 +313,7 @@ def draw_health_bar():
     pygame.draw.rect(tela, BLUE_LIGHT, (20, 20, current_bar_width, bar_height))
 
 def update_bullets():
+    global score, points
     for bullet in bullets[:]:
         bullet[0] += bullet[2]  # Atualiza a posição x da bala
         bullet[1] += bullet[3]  # Atualiza a posição y da bala
@@ -322,6 +330,8 @@ def update_bullets():
                     pygame.mixer.Sound.play(fire_extinguish)
                     pygame.mixer.Sound.fadeout(fire_extinguish, 2000)
                     bullets.remove(bullet)
+                    score += points
+                    print(points)
                     break
                 else:
                     # Se a árvore não está pegando fogo, verifica se a bala já colidiu
@@ -478,9 +488,12 @@ while True:
                 if distance != 0:
                     direction_x /= distance
                     direction_y /= distance
-                bullet_speed = 4
-                direction_x *= bullet_speed
-                direction_y *= bullet_speed
+                if current_phase == 1:
+                    tree_bullet_speed = 4
+                elif current_phase > current_phase - 1:
+                    tree_bullet_speed += 0.05
+                direction_x *= tree_bullet_speed
+                direction_y *= tree_bullet_speed
                 tree_bullets.append([pos[0] + 30, pos[1] + 40, direction_x, direction_y])
 
     tela.fill(GREEN_GRASS)
@@ -531,6 +544,8 @@ while True:
         if count_trees_fire == len(trees_on_fire):
             reset_trees()  # reseta as árvores nas pra próximas fases
             current_phase += 1
+            if current_phase > current_phase - 2 :
+                points += 5
 
     blink_timer += clock.get_time()
     if blink_timer >= blink_interval:
