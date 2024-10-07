@@ -158,6 +158,7 @@ def create_trees():
 # reinicia o estado das árvores para a próxima fase
 def reset_trees():
     global trees_on_fire, tree_positions
+    trees_on_fire = []
     trees_on_fire[:] = [True] * len(trees_on_fire) # todas as arvores em chamas
     tree_positions = []  # reinicia as posições das árvores
     create_trees()  # cria novas árvores para a próxima fase
